@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WalletSentry - AI Wallet Security</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+[data-theme="light"]{
+  --bg:#f5f5f0;
+  --surface:#ffffff;
+  --surface2:#f0f0eb;
+  --border:#e0e0d8;
+  --text:#0a0a0a;
+  --muted:#888880;
+  --muted2:#bbb;
+  --green:#00cc55;
+  --green-bright:#00ff66;
+  --red:#e03030;
+  --amber:#d97700;
+  --shadow:rgba(0,0,0,0.06);
+  --shadow-hover:rgba(0,0,0,0.12);
+}
+[data-theme="dark"]{
+  --bg:#0a0a0a;
+  --surface:#111111;
+  --surface2:#161616;
+  --border:#222222;
+  --text:#f0f0f0;
+  --muted:#666660;
+  --muted2:#333;
+  --green:#00cc55;
+  --green-bright:#00ff66;
+  --red:#ff4444;
+  --amber:#ffaa00;
+  --shadow:rgba(0,0,0,0.3);
+  --shadow-hover:rgba(0,0,0,0.5);
+}
+
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden;transition:background 0.3s,color 0.3s}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;transition:background 0.3s,border-color 0.3s}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text)}
+.logo span{color:var(--green)}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;letter-spacing:0.3px;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.theme-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s;color:var(--text);font-family:monospace}
+.theme-toggle:hover{border-color:var(--muted)}
+.btn-connect{background:var(--text);color:var(--bg);padding:10px 20px;font-size:13px;font-weight:700;border:none;cursor:pointer;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s;letter-spacing:0.3px}
+.btn-connect:hover{opacity:0.85;transform:translateY(-1px)}
+
+/* HERO - always dark */
+.hero{background:#0a0a0a;color:#fff;padding:100px 48px 90px;position:relative;overflow:hidden}
+
+/* GRID - only in corners, fades to nothing in center */
+.hero-grid{
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size:48px 48px;
+  mask-image:
+    radial-gradient(ellipse 60% 80% at 5% 50%, black 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 95% 50%, black 0%, transparent 70%);
+  -webkit-mask-image:
+    radial-gradient(ellipse 60% 80% at 5% 50%, black 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 95% 50%, black 0%, transparent 70%);
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+  pointer-events:none;
+}
+
+.hero-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:1}
+.hero-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;animation:livepulse 2s infinite}
+@keyframes livepulse{0%,100%{box-shadow:0 0 0 0 rgba(0,204,85,0.5)}70%{box-shadow:0 0 0 8px rgba(0,204,85,0)}}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,9vw,130px);line-height:0.9;letter-spacing:3px;margin-bottom:28px}
+.hero-title .outline{-webkit-text-stroke:2px #ffffff;color:transparent}
+.hero-title .green{color:var(--green)}
+.hero-sub{font-size:17px;color:rgba(255,255,255,0.45);line-height:1.8;margin-bottom:40px;font-weight:300;max-width:500px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn-hero-primary{background:var(--green);color:#000;padding:14px 32px;font-size:14px;font-weight:700;border:none;cursor:pointer;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s}
+.btn-hero-primary:hover{background:var(--green-bright);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,204,85,0.3)}
+.btn-hero-secondary{background:transparent;color:#fff;padding:14px 32px;font-size:14px;font-weight:600;border:1px solid rgba(255,255,255,0.2);cursor:pointer;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s}
+.btn-hero-secondary:hover{border-color:rgba(255,255,255,0.5)}
+
+/* HERO CARD - solid, no transparency */
+.hero-card{background:#161616;border:1px solid #2a2a2a;border-radius:20px;overflow:hidden}
+.hcard-header{padding:20px 24px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center}
+.hcard-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.35);text-transform:uppercase}
+.hcard-live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);font-family:'IBM Plex Mono',monospace}
+
+/* SCORE RING */
+.score-section{padding:28px 24px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:24px;background:#161616}
+.score-ring-wrap{position:relative;width:88px;height:88px;flex-shrink:0}
+.score-ring-wrap svg{transform:rotate(-90deg)}
+.score-bg-circle{fill:none;stroke:#2a2a2a;stroke-width:6}
+.score-fg-circle{fill:none;stroke:var(--green);stroke-width:6;stroke-linecap:round;stroke-dasharray:239.4;stroke-dashoffset:239.4;transition:stroke-dashoffset 2s cubic-bezier(0.4,0,0.2,1)}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num-ring{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green);line-height:1}
+.score-max{font-size:9px;color:rgba(255,255,255,0.25);font-family:'IBM Plex Mono',monospace}
+.score-grade{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.score-detail{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:10px}
+.score-bar{height:4px;background:#2a2a2a;border-radius:100px;width:100%}
+.score-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),#00ff88);width:0%;border-radius:100px;transition:width 2s cubic-bezier(0.4,0,0.2,1)}
+
+/* THREAT LIST */
+.threat-list{padding:16px;background:#161616}
+.threat-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;background:#111;margin-bottom:8px;transition:background 0.2s}
+.threat-item:last-child{margin-bottom:0}
+.threat-item:hover{background:#1c1c1c}
+.ti-left{display:flex;align-items:center;gap:12px}
+.ti-bar{width:3px;height:32px;border-radius:100px;flex-shrink:0}
+.bar-red{background:var(--red)}
+.bar-amber{background:#ffaa00}
+.bar-green{background:var(--green)}
+.ti-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px}
+.ti-time{font-size:10px;color:rgba(255,255,255,0.3);font-family:'IBM Plex Mono',monospace}
+.risk-tag{font-size:9px;font-weight:700;padding:4px 10px;border-radius:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;white-space:nowrap}
+.rt-red{background:rgba(224,48,48,0.12);color:#ff4444;border:1px solid rgba(224,48,48,0.25)}
+.rt-amber{background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid rgba(255,170,0,0.2)}
+.rt-green{background:rgba(0,204,85,0.08);color:var(--green);border:1px solid rgba(0,204,85,0.2)}
+
+/* STATS - solid background, no grid showing through */
+.stats-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.stats-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.stat-cell{padding:48px 40px;border-right:1px solid var(--border);background:var(--surface);transition:border-color 0.3s,background 0.3s}
+.stat-cell:last-child{border-right:none}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:2px;line-height:1;margin-bottom:6px}
+.stat-label{font-size:13px;color:var(--muted);font-weight:500}
+.stat-sub{font-size:11px;color:var(--muted2);margin-top:4px;font-family:'IBM Plex Mono',monospace}
+
+/* FEATURES */
+.features{max-width:1240px;margin:0 auto;padding:100px 48px}
+.feat-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px}
+.feat-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.feat-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,5vw,72px);letter-spacing:2px;line-height:0.95;color:var(--text)}
+.feat-sub{font-size:15px;color:var(--muted);max-width:280px;line-height:1.8;text-align:right;font-weight:300}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;transition:all 0.3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);transform:scaleX(0);transition:transform 0.3s}
+.feat-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px var(--shadow-hover);border-color:rgba(0,204,85,0.2)}
+.feat-card:hover::before{transform:scaleX(1)}
+.feat-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted2);letter-spacing:2px;margin-bottom:20px}
+.feat-name{font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px;letter-spacing:-0.3px}
+.feat-desc{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* PROOF SECTION */
+.proof-section{background:#0a0a0a;color:#fff;padding:100px 48px}
+.proof-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.proof-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.proof-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,6vw,80px);letter-spacing:2px;line-height:0.9;margin-bottom:20px}
+.proof-desc{font-size:16px;color:rgba(255,255,255,0.4);line-height:1.8;font-weight:300}
+.proof-card{background:#111;border:1px solid #222;border-radius:16px;padding:28px;font-family:'IBM Plex Mono',monospace}
+.pc-title{font-size:10px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.pc-verified{width:16px;height:16px;background:rgba(0,204,85,0.15);border:1px solid rgba(0,204,85,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--green);flex-shrink:0}
+.pc-row{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid #1e1e1e;font-size:11px;gap:16px}
+.pc-row:last-child{border-bottom:none}
+.pc-key{color:rgba(255,255,255,0.3);flex-shrink:0}
+.pc-val{color:rgba(255,255,255,0.8);text-align:right}
+.pc-val.g{color:var(--green)}
+.pc-hash{color:rgba(255,170,0,0.7);word-break:break-all;font-size:9px;text-align:right}
+
+/* DASHBOARD PREVIEW */
+.dash-section{padding:0 48px 100px;max-width:1240px;margin:0 auto}
+.ds-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.ds-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,5vw,72px);letter-spacing:2px;line-height:0.95;color:var(--text);margin-bottom:40px}
+.dash-window{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 24px 64px var(--shadow);transition:all 0.3s}
+.dash-bar{display:flex;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);gap:8px;background:var(--surface2)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.dash-url{flex:1;text-align:center;font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.dash-body{display:grid;grid-template-columns:220px 1fr}
+.dash-side{border-right:1px solid var(--border);padding:20px;background:var(--surface)}
+.ds-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);color:var(--text)}
+.ds-logo span{color:var(--green)}
+.ds-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:2px;transition:all 0.2s;font-weight:500}
+.ds-nav-item:hover{background:var(--surface2);color:var(--text)}
+.ds-nav-item.active{background:rgba(0,204,85,0.06);color:var(--green);font-weight:600;border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding-left:10px}
+.dash-main{padding:24px;display:flex;flex-direction:column;gap:16px;background:var(--bg)}
+.dash-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.dm-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;transition:all 0.3s}
+.dm-card:hover{border-color:rgba(0,204,85,0.2);transform:translateY(-1px)}
+.dm-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.dm-val{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;line-height:1}
+.dm-val.g{color:var(--green)}.dm-val.r{color:var(--red)}.dm-val.a{color:var(--amber)}
+.dm-sub{font-size:10px;color:var(--muted2);margin-top:4px;font-family:'IBM Plex Mono',monospace}
+.dash-table{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.dt-head{display:grid;grid-template-columns:1fr 90px 130px 80px;padding:10px 16px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;border-bottom:1px solid var(--border);background:var(--surface2)}
+.dt-row{display:grid;grid-template-columns:1fr 90px 130px 80px;padding:12px 16px;font-size:12px;border-bottom:1px solid var(--border);align-items:center;transition:background 0.2s;cursor:pointer}
+.dt-row:last-child{border-bottom:none}
+.dt-row:hover{background:var(--surface2)}
+.dt-hash{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+.risk-chip{font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px}
+.rc-green{background:rgba(0,204,85,0.1);color:var(--green);border:1px solid rgba(0,204,85,0.2)}
+.rc-red{background:rgba(224,48,48,0.1);color:var(--red);border:1px solid rgba(224,48,48,0.2)}
+.rc-amber{background:rgba(217,119,0,0.1);color:var(--amber);border:1px solid rgba(217,119,0,0.2)}
+
+/* FOOTER */
+footer{background:#0a0a0a;color:#fff;padding:64px 48px 40px;border-top:1px solid #1a1a1a}
+.footer-inner{max-width:1240px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px;padding-bottom:48px;border-bottom:1px solid #1e1e1e}
+.footer-brand{}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;margin-bottom:12px}
+.footer-logo span{color:var(--green)}
+.footer-tagline{font-size:14px;color:rgba(255,255,255,0.35);line-height:1.7;font-weight:300;max-width:280px;margin-bottom:24px}
+.footer-ambient{display:inline-flex;align-items:center;gap:8px;background:rgba(0,204,85,0.06);border:1px solid rgba(0,204,85,0.15);padding:8px 14px;border-radius:8px;font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;text-decoration:none;transition:all 0.2s}
+.footer-ambient:hover{background:rgba(0,204,85,0.1);border-color:rgba(0,204,85,0.3)}
+.footer-col-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:20px}
+.footer-links{display:flex;flex-direction:column;gap:12px}
+.footer-links a{font-size:14px;color:rgba(255,255,255,0.45);text-decoration:none;transition:color 0.2s;font-weight:400}
+.footer-links a:hover{color:#fff}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-copy{font-size:12px;color:rgba(255,255,255,0.2);font-family:'IBM Plex Mono',monospace}
+.footer-powered{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.2);font-family:'IBM Plex Mono',monospace}
+.footer-powered span{color:var(--green)}
+
+/* MOBILE */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:48px}
+  .proof-inner{grid-template-columns:1fr;gap:48px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px}
+}
+@media(max-width:768px){
+  nav{padding:0 20px}
+  .nav-links{display:none}
+  .hero{padding:60px 20px}
+  .stats-inner{grid-template-columns:1fr 1fr}
+  .stat-cell:nth-child(2){border-right:none}
+  .stat-cell:nth-child(3),.stat-cell:nth-child(4){border-top:1px solid var(--border)}
+  .stat-cell:nth-child(4){border-right:none}
+  .features{padding:60px 20px}
+  .feat-header{flex-direction:column;align-items:flex-start;gap:16px}
+  .feat-sub{text-align:left;max-width:100%}
+  .feat-grid{grid-template-columns:1fr}
+  .proof-section{padding:60px 20px}
+  .dash-section{padding:0 20px 60px}
+  .dash-body{grid-template-columns:1fr}
+  .dash-side{display:none}
+  .dash-metrics{grid-template-columns:1fr 1fr}
+  .dt-head,.dt-row{grid-template-columns:1fr 80px 70px}
+  footer{padding:48px 20px 32px}
+  .footer-top{grid-template-columns:1fr;gap:32px}
+}
+@media(max-width:480px){
+  .hero-btns{flex-direction:column}
+  .btn-hero-primary,.btn-hero-secondary{width:100%;text-align:center}
+  .stats-inner{grid-template-columns:1fr}
+  .stat-cell{border-right:none;border-top:1px solid var(--border)}
+  .stat-cell:first-child{border-top:none}
+  .dash-metrics{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">WALLET<span>SENTRY</span></div>
+  <div class="nav-links">
+    <a href="#">Dashboard</a>
+    <a href="#">Scanner</a>
+    <a href="#">Approvals</a>
+    <a href="#">Docs</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeBtn" title="Toggle dark mode">◑</button>
+    <button class="btn-connect">Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag"><span class="live-dot"></span>Powered by Ambient Network - GLM 5.1</div>
+      <div class="hero-title">YOUR<br><span class="outline">WALLET</span><br><span class="green">GUARDED.</span></div>
+      <p class="hero-sub">Real-time AI security for your Solana wallet. Every threat alert cryptographically verified on-chain - no black boxes, no guessing.</p>
+      <div class="hero-btns">
+        <button class="btn-hero-primary">Connect Wallet</button>
+        <button class="btn-hero-secondary">View Demo</button>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hcard-header">
+        <span class="hcard-title">Wallet Health</span>
+        <span class="hcard-live"><span class="live-dot"></span>Live</span>
+      </div>
+      <div class="score-section">
+        <div class="score-ring-wrap">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle class="score-bg-circle" cx="44" cy="44" r="38"/>
+            <circle class="score-fg-circle" id="scoreRing" cx="44" cy="44" r="38"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-num-ring" id="scoreNum">0</div>
+            <div class="score-max">/100</div>
+          </div>
+        </div>
+        <div>
+          <div class="score-grade">Good Standing</div>
+          <div class="score-detail">2 issues detected</div>
+          <div class="score-bar"><div class="score-bar-fill" id="scoreBar"></div></div>
+        </div>
+      </div>
+      <div class="threat-list">
+        <div class="threat-item">
+          <div class="ti-left">
+            <div class="ti-bar bar-red"></div>
+            <div>
+              <div class="ti-name">Unlimited USDC Approval</div>
+              <div class="ti-time">2 min ago - 0x7f3a...c9d2</div>
+            </div>
+          </div>
+          <span class="risk-tag rt-red">CRITICAL</span>
+        </div>
+        <div class="threat-item">
+          <div class="ti-left">
+            <div class="ti-bar bar-amber"></div>
+            <div>
+              <div class="ti-name">Unverified Contract</div>
+              <div class="ti-time">Deployed 2hrs ago - no audit</div>
+            </div>
+          </div>
+          <span class="risk-tag rt-amber">MEDIUM</span>
+        </div>
+        <div class="threat-item">
+          <div class="ti-left">
+            <div class="ti-bar bar-green"></div>
+            <div>
+              <div class="ti-name">SOL Transfer Verified</div>
+              <div class="ti-time">1hr ago - known address</div>
+            </div>
+          </div>
+          <span class="risk-tag rt-green">SAFE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS - real Ambient Network stats, solid background -->
+<div class="stats-section">
+  <div class="stats-inner">
+    <div class="stat-cell">
+      <div class="stat-val" style="color:var(--green)">600B+</div>
+      <div class="stat-label">Model Parameters</div>
+      <div class="stat-sub">GLM 5.1 on Ambient Network</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" style="color:var(--green)">0.1%</div>
+      <div class="stat-label">Verification Overhead</div>
+      <div class="stat-sub">vs 1000x for ZK proofs</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">Solana</div>
+      <div class="stat-label">Compatible Network</div>
+      <div class="stat-sub">SVM fork - all tools work</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" style="color:var(--green)">Live</div>
+      <div class="stat-label">Testnet Status</div>
+      <div class="stat-sub">app.ambient.xyz</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="feat-header">
+    <div>
+      <div class="feat-tag">What we do</div>
+      <div class="feat-title">SIX LAYERS<br>OF PROTECTION.</div>
+    </div>
+    <div class="feat-sub">Every decision powered by Ambient AI and proven on-chain with cryptographic receipts.</div>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-num">01 - MONITORING</div>
+      <div class="feat-name">Real-Time Threat Detection</div>
+      <div class="feat-desc">Ambient AI watches every transaction and approval the moment it happens. Get instant alerts before damage is done.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">02 - SCANNER</div>
+      <div class="feat-name">Token Risk Scanner</div>
+      <div class="feat-desc">Paste any token address. AI analyzes contract code, liquidity, holder patterns, and deployer wallet history in seconds.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">03 - VERIFICATION</div>
+      <div class="feat-name">On-Chain Proof Receipts</div>
+      <div class="feat-desc">Every AI decision has a cryptographic proof stored on Ambient Network. No black boxes. Total transparency.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">04 - APPROVALS</div>
+      <div class="feat-name">Approval Manager</div>
+      <div class="feat-desc">See every active token approval with AI risk ratings. One click to revoke dangerous permissions instantly.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">05 - HISTORY</div>
+      <div class="feat-name">Risk-Rated Timeline</div>
+      <div class="feat-desc">Full timeline of your wallet activity. Every transaction AI-rated with clear risk levels and on-chain reasoning.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">06 - AI</div>
+      <div class="feat-name">Powered by GLM 5.1</div>
+      <div class="feat-desc">Running on Ambient Network's 600B parameter model. The most powerful verified AI in the crypto ecosystem.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="dash-section">
+  <div class="ds-tag">Dashboard preview</div>
+  <div class="ds-title">EVERYTHING<br>IN ONE VIEW.</div>
+  <div class="dash-window">
+    <div class="dash-bar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <div class="dash-url">app.walletsentry.xyz - 4xK9...mR2p</div>
+    </div>
+    <div class="dash-body">
+      <div class="dash-side">
+        <div class="ds-logo">WALLET<span>SENTRY</span></div>
+        <div class="ds-nav-item active">Dashboard</div>
+        <div class="ds-nav-item">Token Scanner</div>
+        <div class="ds-nav-item">Approvals</div>
+        <div class="ds-nav-item">History</div>
+        <div class="ds-nav-item">Proof Receipts</div>
+      </div>
+      <div class="dash-main">
+        <div class="dash-metrics">
+          <div class="dm-card">
+            <div class="dm-label">Health Score</div>
+            <div class="dm-val g" id="dm1">0</div>
+            <div class="dm-sub">Good standing</div>
+          </div>
+          <div class="dm-card">
+            <div class="dm-label">Live Threats</div>
+            <div class="dm-val r" id="dm2">0</div>
+            <div class="dm-sub">Needs attention</div>
+          </div>
+          <div class="dm-card">
+            <div class="dm-label">Risky Approvals</div>
+            <div class="dm-val a" id="dm3">0</div>
+            <div class="dm-sub">Revoke advised</div>
+          </div>
+          <div class="dm-card">
+            <div class="dm-label">AI Proofs</div>
+            <div class="dm-val g" id="dm4">0</div>
+            <div class="dm-sub">All on-chain</div>
+          </div>
+        </div>
+        <div class="dash-table">
+          <div class="dt-head">
+            <span>Transaction</span><span>Type</span><span>Amount</span><span>Risk</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-hash">4xK9...mR2p</span>
+            <span>Swap</span>
+            <span>120 SOL</span>
+            <span class="risk-chip rc-green">SAFE</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-hash">7bN3...qW8s</span>
+            <span>Approval</span>
+            <span>Unlimited USDC</span>
+            <span class="risk-chip rc-red">CRITICAL</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-hash">2pL5...kX4d</span>
+            <span>Transfer</span>
+            <span>0.5 SOL</span>
+            <span class="risk-chip rc-green">SAFE</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-hash">9mQ7...hF1c</span>
+            <span>NFT Mint</span>
+            <span>0.1 SOL</span>
+            <span class="risk-chip rc-amber">REVIEW</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section class="proof-section">
+  <div class="proof-inner">
+    <div>
+      <div class="proof-tag"><span class="live-dot"></span>On-chain verification</div>
+      <div class="proof-title">AI THAT<br>CANNOT LIE.</div>
+      <p class="proof-desc">Every threat alert WalletSentry issues comes with a cryptographic proof from Ambient Network. The AI's exact reasoning, model version, and timestamp are stored on-chain permanently. Nobody can fake it. Nobody can change it.</p>
+    </div>
+    <div class="proof-card">
+      <div class="pc-title"><div class="pc-verified">✓</div>Verified AI Decision</div>
+      <div class="pc-row"><span class="pc-key">Decision</span><span class="pc-val">HIGH RISK - Unlimited Approval</span></div>
+      <div class="pc-row"><span class="pc-key">Model</span><span class="pc-val g">GLM 5.1 - Ambient Network</span></div>
+      <div class="pc-row"><span class="pc-key">Timestamp</span><span class="pc-val">2026-06-03 14:32:07 UTC</span></div>
+      <div class="pc-row"><span class="pc-key">Consensus</span><span class="pc-val g">Proof of Logits - Verified</span></div>
+      <div class="pc-row"><span class="pc-key">Hash</span><span class="pc-hash">sha256:a4f2c8d91b3e7f5629c4a1b8e3d2f701...</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">WALLET<span>SENTRY</span></div>
+        <div class="footer-tagline">AI-powered Solana wallet security. Every threat verified on-chain by Ambient Network. No black boxes.</div>
+        <a href="https://ambient.xyz" target="_blank" class="footer-ambient">Built on Ambient Network</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Product</div>
+        <div class="footer-links">
+          <a href="#">Dashboard</a>
+          <a href="#">Token Scanner</a>
+          <a href="#">Approval Manager</a>
+          <a href="#">Proof Receipts</a>
+          <a href="#">Docs</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Ambient Network</div>
+        <div class="footer-links">
+          <a href="https://ambient.xyz" target="_blank">ambient.xyz</a>
+          <a href="https://x.com/ambient_xyz" target="_blank">X - @ambient_xyz</a>
+          <a href="https://discord.gg/3Seasf7DcB" target="_blank">Discord</a>
+          <a href="https://docs.ambient.xyz" target="_blank">Developer Docs</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Builder</div>
+        <div class="footer-links">
+          <a href="https://x.com/Oseodion" target="_blank">X - @Oseodion</a>
+          <a href="https://discord.gg/3Seasf7DcB" target="_blank">Ambient Discord</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">WalletSentry - 2026. Built on Ambient Network testnet.</div>
+      <div class="footer-powered">Verified by <span>Proof of Logits</span> - GLM 5.1</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Theme toggle
+const themeBtn = document.getElementById('themeBtn');
+const html = document.documentElement;
+themeBtn.addEventListener('click', () => {
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  themeBtn.textContent = isDark ? '◑' : '○';
+});
+
+// Score ring animation
+function animateScore(target) {
+  const ring = document.getElementById('scoreRing');
+  const numEl = document.getElementById('scoreNum');
+  const barEl = document.getElementById('scoreBar');
+  const circumference = 239.4;
+  const start = performance.now();
+  const duration = 2000;
+  const update = (now) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(ease * target);
+    ring.style.strokeDashoffset = circumference - (current / 100) * circumference;
+    numEl.textContent = current;
+    barEl.style.width = current + '%';
+    if (progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+// Dashboard metric animation
+function animateNum(id, target, delay) {
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    const start = performance.now();
+    const duration = 1600;
+    const update = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(ease * target);
+      if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }, delay);
+}
+
+// Trigger on load
+window.addEventListener('load', () => {
+  setTimeout(() => animateScore(84), 300);
+  animateNum('dm1', 84, 500);
+  animateNum('dm2', 2, 600);
+  animateNum('dm3', 3, 700);
+  animateNum('dm4', 147, 800);
+});
+</script>
+</body>
+</html>

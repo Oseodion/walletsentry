@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --green: #00cc55;
+  --green-bright: #00ff66;
+  --red: #e03030;
+  --amber: #ffaa00;
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f0;
+  --surface: #ffffff;
+  --surface2: #f0f0eb;
+  --border: #e0e0d8;
+  --text: #0a0a0a;
+  --muted: #888880;
+  --muted2: #bbbbbb;
+  --shadow: rgba(0, 0, 0, 0.06);
+  --shadow-hover: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #161616;
+  --border: #222222;
+  --text: #f0f0f0;
+  --muted: #666660;
+  --muted2: #333333;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-hover: rgba(0, 0, 0, 0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+.font-bebas { font-family: 'Bebas Neue', sans-serif; }
+.font-mono-ibm { font-family: 'IBM Plex Mono', monospace; }
