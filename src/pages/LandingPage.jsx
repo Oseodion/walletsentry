@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../styles/landing.css'
 import Navbar from '../components/Navbar'
 
@@ -54,6 +55,7 @@ export default function LandingPage() {
   const statsRef  = useRef(null)
   const stat600Ref = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const cubicOut = (p) => 1 - Math.pow(1 - p, 3)
@@ -137,7 +139,7 @@ export default function LandingPage() {
               Real-time AI security for your Solana wallet. Every threat alert cryptographically verified on-chain - no black boxes, no guessing.
             </p>
             <div className="hero-btns">
-              <button className="btn-hero-primary">Connect Wallet</button>
+              <button className="btn-hero-primary" onClick={() => navigate('/dashboard')}>Connect Wallet</button>
               <button className="btn-hero-secondary">View Demo</button>
             </div>
           </div>

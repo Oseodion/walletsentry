@@ -1,8 +1,10 @@
 import { useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ThemeContext } from '../context'
 
 export default function Navbar() {
   const { theme, toggleTheme } = useContext(ThemeContext)
+  const navigate = useNavigate()
 
   return (
     <nav>
@@ -17,7 +19,9 @@ export default function Navbar() {
         <button className="theme-toggle" onClick={toggleTheme} title="Toggle dark mode">
           {theme === 'dark' ? '○' : '◑'}
         </button>
-        <button className="btn-connect">Connect Wallet</button>
+        <button className="btn-connect" onClick={() => navigate('/dashboard')}>
+          Connect Wallet
+        </button>
       </div>
     </nav>
   )
