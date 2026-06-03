@@ -1,10 +1,15 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ThemeContext, WalletContext } from './context'
+import LandingPage from './pages/LandingPage'
 
 export default function App() {
   const [theme, setTheme] = useState('light')
   const [walletAddress, setWalletAddress] = useState(null)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'light')
+  }, [])
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light'
@@ -15,13 +20,11 @@ export default function App() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <WalletContext.Provider value={{ walletAddress, setWalletAddress }}>
-        <div data-theme={theme}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<div style={{ padding: 40, fontFamily: 'Bebas Neue' }}>WalletSentry - scaffold ready</div>} />
-            </Routes>
-          </BrowserRouter>
-        </div>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+          </Routes>
+        </BrowserRouter>
       </WalletContext.Provider>
     </ThemeContext.Provider>
   )
