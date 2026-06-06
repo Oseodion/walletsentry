@@ -134,9 +134,6 @@ export default function Dashboard() {
           <div className="wallet-dot" />
           {WALLET_SHORT}
         </div>
-        <button className="btn-disconnect" onClick={() => navigate('/')}>
-          Disconnect
-        </button>
       </div>
 
       {/* SCROLLABLE CONTENT */}

@@ -1,37 +1,85 @@
-/* DASHBOARD LAYOUT */
+/* DASHBOARD LAYOUT
+   Navbar (64px sticky) sits on top.
+   Sidebar is fixed at top:64px, width 240px.
+   Main content has margin-left:240px and scrolls independently. */
+
 .dbl-layout {
-  display: flex;
-  min-height: 100vh;
+  padding-top: 64px; /* height of sticky Navbar */
   background: var(--bg);
+  min-height: 100vh;
 }
 
 .dbl-sidebar {
-  width: 220px;
-  flex-shrink: 0;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  bottom: 0;
+  width: 240px;
   background: var(--surface);
   border-right: 1px solid var(--border);
-  padding: 20px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  padding: 24px 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  z-index: 90;
   transition: background 0.3s, border-color 0.3s;
 }
 
+/* SIDEBAR LOGO - matches landing Navbar exactly */
+.dbl-sidebar-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.dbl-sidebar-logo span { color: var(--green); }
+
+/* SIDEBAR NAV */
 .dbl-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
-/* ensure Link elements look like the mockup nav items */
-a.ds-nav-item { text-decoration: none; }
+.dbl-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.3px;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 2px;
+}
 
+.dbl-nav-link:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.dbl-nav-link.active {
+  background: rgba(0, 204, 85, 0.06);
+  color: var(--green);
+  font-weight: 600;
+  border-left: 3px solid var(--green);
+  border-radius: 0 8px 8px 0;
+  padding-left: 13px; /* 16 - 3px border keeps text alignment consistent */
+}
+
+/* MAIN CONTENT AREA */
 .dbl-main {
-  flex: 1;
-  min-width: 0;
+  margin-left: 240px;
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
 }
@@ -40,8 +88,7 @@ a.ds-nav-item { text-decoration: none; }
 .dash-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 28px;
+  padding: 14px 28px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   transition: background 0.3s, border-color 0.3s;
@@ -68,24 +115,7 @@ a.ds-nav-item { text-decoration: none; }
   background: var(--green);
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-.btn-disconnect {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  transition: all 0.2s;
-}
-
-.btn-disconnect:hover {
-  border-color: var(--red);
-  color: var(--red);
+  animation: livepulse 2s infinite;
 }
 
 /* MAIN SCROLL AREA */
@@ -95,7 +125,6 @@ a.ds-nav-item { text-decoration: none; }
   flex-direction: column;
   gap: 24px;
   flex: 1;
-  overflow-y: auto;
 }
 
 /* METRICS ROW */
@@ -455,6 +484,7 @@ a.ds-nav-item { text-decoration: none; }
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .dbl-sidebar { display: none; }
+  .dbl-main { margin-left: 0; }
   .mobile-tabs { display: flex; }
   .dash-content { padding: 16px; padding-bottom: 72px; }
   .dash-topbar { padding: 12px 16px; }

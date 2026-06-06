@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import Navbar from './Navbar'
 import '../styles/dashboard.css'
 
 const NAV_ITEMS = [
@@ -16,20 +17,17 @@ export default function DashboardLayout({ children }) {
 
   return (
     <>
+      <Navbar />
+
       <div className="dbl-layout">
         <aside className="dbl-sidebar">
-          <div
-            className="ds-logo"
-            style={{ marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}
-          >
-            WALLET<span>SENTRY</span>
-          </div>
+          <div className="dbl-sidebar-logo">WALLET<span>SENTRY</span></div>
           <nav className="dbl-nav">
             {NAV_ITEMS.map(({ label, path }) => (
               <Link
                 key={path}
                 to={path}
-                className={`ds-nav-item${pathname === path ? ' active' : ''}`}
+                className={`dbl-nav-link${pathname === path ? ' active' : ''}`}
               >
                 {label}
               </Link>
