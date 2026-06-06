@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { ThemeContext, WalletContext } from './context'
 import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
+import TokenScanner from './pages/TokenScanner'
 
 export default function App() {
   const [theme, setTheme] = useState('light')
@@ -25,6 +26,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/scanner" element={<TokenScanner />} />
           </Routes>
         </BrowserRouter>
       </WalletContext.Provider>
