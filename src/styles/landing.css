@@ -1,5 +1,5 @@
-/* NAV */
-nav {
+/* NAV - scoped to landing-nav to avoid conflicts with dashboard sidebar nav elements */
+nav.landing-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -840,7 +840,7 @@ footer {
 }
 
 @media (max-width: 768px) {
-  nav { padding: 0 20px; }
+  nav.landing-nav { padding: 0 20px; }
   .nav-links { display: none; }
   .hero { padding: 60px 20px; }
   .stats-inner { grid-template-columns: 1fr 1fr; }

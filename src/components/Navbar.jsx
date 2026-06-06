@@ -9,7 +9,7 @@ export default function Navbar() {
   const onDashboard = pathname !== '/'
 
   return (
-    <nav>
+    <nav className="landing-nav">
       <div className="logo">WALLET<span>SENTRY</span></div>
       {!onDashboard && (
         <div className="nav-links">

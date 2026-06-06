@@ -5,6 +5,9 @@
    No top navbar on dashboard pages — sidebar IS the navigation.
    ============================================================= */
 
+/* ---- Reset box-sizing inside sidebar (counters any global resets) ---- */
+.dbl-sidebar * { box-sizing: border-box; }
+
 .dbl-layout {
   min-height: 100vh;
   background: var(--bg);
@@ -34,10 +37,11 @@
   letter-spacing: 3px;
   color: var(--text);
   padding-bottom: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
   border-bottom: 1px solid var(--border);
   transition: color 0.3s, border-color 0.3s;
   white-space: nowrap;
+  display: block;
 }
 
 .dbl-sidebar-logo span { color: var(--green); }
@@ -76,7 +80,36 @@
   background: rgba(0, 204, 85, 0.06);
   border-left: 3px solid var(--green);
   border-radius: 0 8px 8px 0;
-  padding-left: 13px; /* 16 - 3px border keeps text flush */
+  padding-left: 13px;
+}
+
+/* ---- High-specificity overrides: defeat any landing.css bleed-through ---- */
+.dbl-sidebar .dbl-nav-link {
+  display: block !important;
+  text-align: left !important;
+  padding: 11px 16px !important;
+  margin-bottom: 2px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  color: var(--muted) !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  border-left: 3px solid transparent !important;
+  border-radius: 0 8px 8px 0 !important;
+  transition: all 0.2s !important;
+}
+
+.dbl-sidebar .dbl-nav-link:hover {
+  background: var(--surface2) !important;
+  color: var(--text) !important;
+}
+
+.dbl-sidebar .dbl-nav-link.active {
+  background: rgba(0, 204, 85, 0.06) !important;
+  color: var(--green) !important;
+  border-left-color: var(--green) !important;
+  padding-left: 13px !important;
 }
 
 /* MAIN CONTENT */
@@ -86,6 +119,7 @@
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  transition: background 0.3s;
 }
 
 /* TOP BAR */
