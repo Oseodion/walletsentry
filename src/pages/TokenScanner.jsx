@@ -199,6 +199,13 @@ export default function TokenScanner() {
         {/* RESULTS */}
         {result && (
           <>
+            {/* DEMO WARNING BANNER */}
+            {data.isDemo && (
+              <div className="scanner-demo-banner">
+                Ambient API temporarily unavailable - showing demo result. Live analysis will resume automatically.
+              </div>
+            )}
+
             {/* 1. RISK SCORE */}
             <div className="sc-card">
               <div className="sc-card-header">Risk Score</div>
