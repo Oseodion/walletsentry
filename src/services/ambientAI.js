@@ -54,6 +54,28 @@ async function callAPIWithRetry(tokenAddress, maxRetries = 3) {
       }
 
       const data = await response.json()
+      console.log('[Ambient API Response]', JSON.stringify(data, null, 2))
+
+      if (data.error) {
+        console.error('[Ambient API Error Field]', data.error)
+        throw new Error(`API error: ${JSON.stringify(data.error)}`)
+      }
+
+      if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
+        console.error('[Ambient API Invalid Response] Missing or empty choices array:', data)
+        throw new Error('API returned empty choices array')
+      }
+
+      if (!data.choices[0].message) {
+        console.error('[Ambient API Invalid Response] Missing message object:', data.choices[0])
+        throw new Error('API returned choice without message object')
+      }
+
+      if (!data.choices[0].message.content) {
+        console.error('[Ambient API Invalid Response] Missing message content:', data.choices[0].message)
+        throw new Error('API returned message without content')
+      }
+
       return data.choices[0].message.content
     } catch (err) {
       lastError = err
