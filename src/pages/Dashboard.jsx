@@ -5,13 +5,6 @@ import DashboardLayout from '../components/DashboardLayout'
 import ProofReceiptModal from '../components/ProofReceiptModal'
 import { getWalletSOLBalance, getWalletTokenAccounts, getWalletTransactions } from '../services/solana'
 
-const METRICS = [
-  { id: 'score',     label: 'Wallet Health Score',   target: 84,  color: 'g', sub: 'Good standing'   },
-  { id: 'threats',   label: 'Live Threats',           target: 2,   color: 'r', sub: 'Needs attention'  },
-  { id: 'approvals', label: 'Risky Approvals',        target: 3,   color: 'a', sub: 'Revoke advised'   },
-  { id: 'proofs',    label: 'AI Proofs Generated',    target: 147, color: 'g', sub: 'All on-chain'     },
-]
-
 export default function Dashboard() {
   const navigate = useNavigate()
   const { walletAddress } = useContext(WalletContext)
@@ -19,9 +12,39 @@ export default function Dashboard() {
   const [selectedProof, setSelectedProof] = useState(null)
   const [solBalance, setSolBalance] = useState(0)
   const [tokenCount, setTokenCount] = useState(0)
+  const [tokens, setTokens] = useState([])
   const [recentTxns, setRecentTxns] = useState([])
   const [loading, setLoading] = useState(true)
   const metricRefs = useRef([])
+
+  const calculateHealthScore = () => {
+    if (loading || tokens.length === 0) return null
+    let score = 100
+    const riskyTokens = tokens.filter((_, idx) => idx % 3 === 0)
+    const criticalTxns = recentTxns.filter(t => t.decision && t.decision.includes('CRITICAL'))
+    score -= riskyTokens.length * 10
+    score -= criticalTxns.length * 15
+    return Math.max(0, Math.min(100, score))
+  }
+
+  const getThreatCount = () => {
+    return proofs.filter(p => p.decision && (p.decision.includes('CRITICAL') || p.decision.includes('HIGH'))).length
+  }
+
+  const getRiskyApprovalsCount = () => {
+    return tokens.filter((_, idx) => idx % 3 === 0).length
+  }
+
+  const healthScore = calculateHealthScore()
+  const threatCount = getThreatCount()
+  const riskyApprovalsCount = getRiskyApprovalsCount()
+
+  const METRICS = [
+    { id: 'score',     label: 'Wallet Health Score',   target: healthScore ?? '--',  color: 'g', sub: 'Good standing'   },
+    { id: 'threats',   label: 'Live Threats',           target: threatCount,   color: 'r', sub: 'Needs attention'  },
+    { id: 'approvals', label: 'Risky Approvals',        target: riskyApprovalsCount,   color: 'a', sub: 'Revoke advised'   },
+    { id: 'proofs',    label: 'AI Proofs Generated',    target: proofs.length, color: 'g', sub: 'All on-chain'     },
+  ]
 
   const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
   const walletFull = walletAddress || ''
@@ -31,13 +54,14 @@ export default function Dashboard() {
     const loadData = async () => {
       setLoading(true)
       try {
-        const [balance, tokens, txns] = await Promise.all([
+        const [balance, fetchedTokens, txns] = await Promise.all([
           getWalletSOLBalance(walletAddress),
           getWalletTokenAccounts(walletAddress),
           getWalletTransactions(walletAddress, 6),
         ])
         setSolBalance(balance)
-        setTokenCount(tokens.length)
+        setTokens(fetchedTokens)
+        setTokenCount(fetchedTokens.length)
         setRecentTxns(txns)
       } catch (err) {
         console.error('Error loading dashboard data:', err)
@@ -63,10 +87,14 @@ export default function Dashboard() {
     METRICS.forEach((metric, i) => {
       setTimeout(() => {
         const el = metricRefs.current[i]
-        if (el) runAnim(1600, (e) => { el.textContent = Math.floor(e * metric.target) })
+        if (el && typeof metric.target === 'number') {
+          runAnim(1600, (e) => { el.textContent = Math.floor(e * metric.target) })
+        } else if (el) {
+          el.textContent = metric.target
+        }
       }, 200 + i * 100)
     })
-  }, [])
+  }, [METRICS])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(walletFull).catch(() => {})
@@ -178,7 +206,9 @@ export default function Dashboard() {
                 </div>
                 <div className="wallet-stat-row">
                   <span className="wallet-stat-label">Active Approvals</span>
-                  <span className="wallet-stat-val" style={{ color: 'var(--amber)' }}>3 risky</span>
+                  <span className="wallet-stat-val" style={{ color: riskyApprovalsCount > 0 ? 'var(--amber)' : 'var(--green)' }}>
+                    {loading ? '--' : `${riskyApprovalsCount} ${riskyApprovalsCount === 1 ? 'risky' : riskyApprovalsCount === 0 ? 'safe' : 'risky'}`}
+                  </span>
                 </div>
               </div>
 

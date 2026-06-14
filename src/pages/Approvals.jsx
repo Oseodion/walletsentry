@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { WalletContext } from '../context'
+import { WalletContext, ProofReceiptContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import { analyzeApprovals } from '../services/ambientAI'
 import { getWalletTokenAccounts } from '../services/solana'
@@ -37,8 +37,11 @@ function TokenLogo({ mint, symbol }) {
 export default function Approvals() {
   const navigate = useNavigate()
   const { walletAddress } = useContext(WalletContext)
+  const { addProof } = useContext(ProofReceiptContext)
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState(null)
 
   const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
   const [approvals, setApprovals] = useState([])
@@ -92,6 +95,29 @@ export default function Approvals() {
     }
   }
 
+  const handleAnalyzeAll = async () => {
+    if (approvals.length === 0) return
+    setAnalyzing(true)
+    try {
+      const result = await analyzeApprovals(approvals)
+      setAnalysisResult(result)
+      addProof({
+        type: 'Approval Analysis',
+        decision: `${result.result.overallRisk || 'MEDIUM'} - ${approvals.length} approvals analyzed`,
+        timestamp: result.timestamp,
+        hash: result.hash,
+      })
+      setToast('Analysis completed. Proof receipt saved.')
+      setTimeout(() => setToast(null), 3000)
+    } catch (err) {
+      console.error('Error analyzing approvals:', err)
+      setToast('Analysis failed. Please try again.')
+      setTimeout(() => setToast(null), 3000)
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="dash-topbar">
@@ -110,8 +136,59 @@ export default function Approvals() {
             <div className="approvals-title">APPROVAL MANAGER</div>
             <div className="approvals-subtitle">Review and revoke active token approvals for your wallet</div>
           </div>
-          <button className="analyze-btn">Analyze All with AI</button>
+          <button
+            className="analyze-btn"
+            onClick={handleAnalyzeAll}
+            disabled={approvals.length === 0 || analyzing}
+            title={approvals.length === 0 ? 'No approvals to analyze' : ''}
+          >
+            {analyzing ? 'Analyzing...' : 'Analyze All with AI'}
+          </button>
         </div>
+
+        {analysisResult && (
+          <div style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 20
+          }}>
+            <div style={{
+              fontSize: 14,
+              fontWeight: 600,
+              marginBottom: 12,
+              color: 'var(--text)'
+            }}>
+              Analysis Result
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              fontSize: 13
+            }}>
+              <div>
+                <span style={{ color: 'var(--muted)' }}>Overall Risk:</span>
+                <div style={{ color: 'var(--green)', fontWeight: 600 }}>
+                  {analysisResult.result.overallRisk || 'MEDIUM'}
+                </div>
+              </div>
+              <div>
+                <span style={{ color: 'var(--muted)' }}>Risk Score:</span>
+                <div style={{ fontWeight: 600 }}>
+                  {analysisResult.result.riskScore || '--'}/100
+                </div>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <span style={{ color: 'var(--muted)' }}>Summary:</span>
+                <div style={{ color: 'var(--text)', marginTop: 4 }}>
+                  {analysisResult.result.summary || 'Analysis complete'}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="approvals-stats">
           <div className="stat-chip">
