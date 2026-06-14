@@ -36,6 +36,8 @@ Every AI analysis in WalletSentry is powered by Ambient's GLM 5.1 model via veri
 6. Install Phantom wallet from phantom.app
 7. Click Connect Wallet
 
+**Note:** Scan history and proof receipts are saved locally in your browser per wallet address.
+
 ## Built by
 
 Jeff - [@web3_tech_](https://x.com/web3_tech_) on X

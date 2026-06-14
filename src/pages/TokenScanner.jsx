@@ -90,12 +90,28 @@ export default function TokenScanner() {
   const { walletAddress } = useContext(WalletContext)
   const { addProof } = useContext(ProofReceiptContext)
   const [address, setAddress]           = useState('')
+  const [scanHistory, setScanHistory]   = useState([])
 
   const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
   const [scanning, setScanning]         = useState(false)
   const [data, setData]                 = useState(null)
   const [error, setError]               = useState(null)
   const [typedSummary, setTypedSummary] = useState('')
+
+  const scanHistoryKey = walletAddress ? `walletsentry_scans_${walletAddress}` : null
+
+  useEffect(() => {
+    if (scanHistoryKey) {
+      try {
+        const saved = localStorage.getItem(scanHistoryKey)
+        if (saved) {
+          setScanHistory(JSON.parse(saved))
+        }
+      } catch (err) {
+        console.error('[Scanner] Failed to load scan history:', err)
+      }
+    }
+  }, [walletAddress, scanHistoryKey])
 
   useEffect(() => {
     if (!data?.result?.summary) return
@@ -109,6 +125,22 @@ export default function TokenScanner() {
     }, 18)
     return () => clearInterval(id)
   }, [data])
+
+  const saveScanToHistory = (tokenAddr, riskScore, riskLevel, summary) => {
+    if (!scanHistoryKey) return
+
+    const newScan = {
+      tokenAddress: tokenAddr,
+      riskScore,
+      riskLevel,
+      summary,
+      timestamp: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    }
+
+    const updated = [newScan, ...scanHistory].slice(0, 20)
+    setScanHistory(updated)
+    localStorage.setItem(scanHistoryKey, JSON.stringify(updated))
+  }
 
   const handleScan = async () => {
     const addr = address.trim()
@@ -125,6 +157,8 @@ export default function TokenScanner() {
       }
       setData(result)
 
+      saveScanToHistory(addr, result.result.riskScore, result.result.riskLevel, result.result.summary)
+
       addProof({
         type: 'Token Analysis',
         decision: `${result.result.riskLevel} - Risk Score ${result.result.riskScore}/100`,
@@ -135,6 +169,17 @@ export default function TokenScanner() {
       setError(err.message || 'Analysis failed. Check your API key and try again.')
     } finally {
       setScanning(false)
+    }
+  }
+
+  const handleSelectFromHistory = (scan) => {
+    setAddress(scan.tokenAddress)
+  }
+
+  const handleClearHistory = () => {
+    if (scanHistoryKey && window.confirm('Clear all scan history for this wallet?')) {
+      setScanHistory([])
+      localStorage.removeItem(scanHistoryKey)
     }
   }
 
@@ -194,6 +239,70 @@ export default function TokenScanner() {
             ))}
           </div>
         </div>
+
+        {/* RECENT SCANS */}
+        {scanHistory.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Recent Scans</div>
+              <button
+                onClick={handleClearHistory}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--muted)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  textDecoration: 'underline',
+                }}
+              >
+                Clear History
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {scanHistory.map((scan, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleSelectFromHistory(scan)}
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--surface)')}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+                      {scan.tokenAddress.slice(0, 8)}...{scan.tokenAddress.slice(-6)}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '4px 10px',
+                        borderRadius: 4,
+                        background: scan.riskLevel === 'SAFE' ? 'rgba(0, 204, 85, 0.1)' : scan.riskLevel === 'MEDIUM' ? 'rgba(255, 170, 0, 0.1)' : 'rgba(224, 48, 48, 0.1)',
+                        color: scan.riskLevel === 'SAFE' ? '#00cc55' : scan.riskLevel === 'MEDIUM' ? '#ffaa00' : '#e03030',
+                      }}
+                    >
+                      {scan.riskLevel}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>
+                    {scan.timestamp}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* LOADING */}
         {scanning && (
