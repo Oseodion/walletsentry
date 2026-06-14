@@ -1,6 +1,6 @@
 # WalletSentry
 
-AI-powered Solana wallet security dashboard built on Ambient Network. Every threat alert is analyzed by Ambient's verified AI (GLM 5.1) and comes with a cryptographic proof receipt stored on-chain.
+AI-powered Solana wallet security dashboard built on Ambient Network. Every threat alert is analyzed by Ambient's verified AI (ambient/large) and comes with a cryptographic proof receipt stored on-chain.
 
 ## What it does
 
@@ -12,7 +12,7 @@ AI-powered Solana wallet security dashboard built on Ambient Network. Every thre
 
 ## Why Ambient Network
 
-Every AI analysis in WalletSentry is powered by Ambient's GLM 5.1 model via verified inference. Unlike traditional AI APIs where the model can change silently or outputs can be manipulated, Ambient's Proof of Logits consensus means every AI decision is cryptographically verifiable on-chain. When WalletSentry says a token is HIGH RISK - you can prove that's what the AI said, permanently.
+Every AI analysis in WalletSentry is powered by Ambient's ambient/large model via verified inference. Unlike traditional AI APIs where the model can change silently or outputs can be manipulated, Ambient's Proof of Logits consensus means every AI decision is cryptographically verifiable on-chain. When WalletSentry says a token is HIGH RISK - you can prove that's what the AI said, permanently.
 
 ## Tech Stack
 
@@ -21,6 +21,9 @@ Every AI analysis in WalletSentry is powered by Ambient's GLM 5.1 model via veri
 - Solana web3.js - RPC: https://rpc.ambient.xyz
 - Phantom wallet adapter
 - React Router
+
+## Live Demo
+https://walletsentry.vercel.app
 
 ## Getting Started
 
