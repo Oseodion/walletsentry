@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import '../styles/history.css'
-
-const WALLET_SHORT = '4xK9...mR2p'
 
 const TRANSACTIONS = [
   { id: 1, hash: '4xK9...mR2p', type: 'SWAP', amount: '120 SOL', token: 'USDC', time: '2 min ago', risk: 'SAFE' },
@@ -20,7 +19,10 @@ const TRANSACTIONS = [
 
 export default function History() {
   const navigate = useNavigate()
+  const { walletAddress } = useContext(WalletContext)
   const [search, setSearch] = useState('')
+
+  const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
   const [typeFilter, setTypeFilter] = useState('all')
   const [riskFilter, setRiskFilter] = useState('all')
   const [page, setPage] = useState(0)
@@ -49,7 +51,7 @@ export default function History() {
       <div className="dash-topbar">
         <div className="wallet-badge">
           <div className="wallet-dot" />
-          {WALLET_SHORT}
+          {walletShort}
         </div>
         <button className="btn-disconnect" onClick={() => navigate('/')}>
           Disconnect
@@ -107,14 +109,12 @@ export default function History() {
             <div className="table-row" key={t.id}>
               <div className="txn-hash">
                 {t.hash}
-                <span className="copy-icon" title="Copy hash">📋</span>
               </div>
               <div className={`type-badge type-${t.type.toLowerCase()}`}>{t.type}</div>
               <span>{t.amount}</span>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t.token}</span>
               <span style={{ fontSize: 11, color: 'var(--muted)' }}>{t.time}</span>
               <span className={`risk-chip rc-${t.risk === 'SAFE' ? 'green' : t.risk === 'MEDIUM' ? 'amber' : 'red'}`}>{t.risk}</span>
-              <a href="#" className="explorer-link" title="View on Explorer">↗</a>
             </div>
           ))}
         </div>

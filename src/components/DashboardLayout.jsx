@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }) {
     <>
       <div className="dbl-layout">
         <aside className="dbl-sidebar">
-          <div className="dbl-sidebar-logo">
+          <div className="dbl-sidebar-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
             WALLET<span>SENTRY</span>
           </div>
           <nav className="dbl-nav">

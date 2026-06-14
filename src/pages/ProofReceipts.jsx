@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
+import { useContext } from 'react'
+import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import '../styles/proofreceipts.css'
-
-const WALLET_SHORT = '4xK9...mR2p'
 
 const PROOFS = [
   {
@@ -51,13 +51,16 @@ const PROOFS = [
 
 export default function ProofReceipts() {
   const navigate = useNavigate()
+  const { walletAddress } = useContext(WalletContext)
+
+  const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
 
   return (
     <DashboardLayout>
       <div className="dash-topbar">
         <div className="wallet-badge">
           <div className="wallet-dot" />
-          {WALLET_SHORT}
+          {walletShort}
         </div>
         <button className="btn-disconnect" onClick={() => navigate('/')}>
           Disconnect

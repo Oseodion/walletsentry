@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import ProofReceiptModal from '../components/ProofReceiptModal'
-
-const WALLET_FULL    = '4xK9mR2pHjK7vbL3nMq8wZrT5sPcF2dYeXh'
-const WALLET_SHORT   = '4xK9...mR2p'
 
 const METRICS = [
   { id: 'score',     label: 'Wallet Health Score',   target: 84,  color: 'g', sub: 'Good standing'   },
@@ -99,8 +97,12 @@ const TRANSACTIONS = [
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { walletAddress } = useContext(WalletContext)
   const [selectedProof, setSelectedProof] = useState(null)
   const metricRefs = useRef([])
+
+  const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
+  const walletFull = walletAddress || ''
 
   useEffect(() => {
     const cubicOut = (p) => 1 - Math.pow(1 - p, 3)
@@ -123,7 +125,7 @@ export default function Dashboard() {
   }, [])
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(WALLET_FULL).catch(() => {})
+    navigator.clipboard.writeText(walletFull).catch(() => {})
   }
 
   return (
@@ -132,7 +134,7 @@ export default function Dashboard() {
       <div className="dash-topbar">
         <div className="wallet-badge">
           <div className="wallet-dot" />
-          {WALLET_SHORT}
+          {walletShort}
         </div>
         <button className="btn-disconnect" onClick={() => navigate('/')}>
           Disconnect
@@ -207,8 +209,9 @@ export default function Dashboard() {
                   className="wallet-address-value"
                   onClick={handleCopy}
                   title="Click to copy"
+                  style={{ cursor: walletFull ? 'pointer' : 'default' }}
                 >
-                  {WALLET_FULL}
+                  {walletFull || 'Loading...'}
                 </div>
               </div>
 

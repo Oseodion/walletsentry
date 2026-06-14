@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import { analyzeToken } from '../services/ambientAI'
 import '../styles/scanner.css'
-
-const WALLET_SHORT = '4xK9...mR2p'
 
 const EXAMPLES = [
   { label: 'SOL',           address: 'So11111111111111111111111111111111111111112'  },
@@ -86,7 +85,10 @@ function StatusBadge({ status }) {
 
 export default function TokenScanner() {
   const navigate = useNavigate()
+  const { walletAddress } = useContext(WalletContext)
   const [address, setAddress]           = useState('')
+
+  const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
   const [scanning, setScanning]         = useState(false)
   const [data, setData]                 = useState(null)
   const [error, setError]               = useState(null)
@@ -132,7 +134,7 @@ export default function TokenScanner() {
       <div className="dash-topbar">
         <div className="wallet-badge">
           <div className="wallet-dot" />
-          {WALLET_SHORT}
+          {walletShort}
         </div>
         <button className="btn-disconnect" onClick={() => navigate('/')}>
           Disconnect
