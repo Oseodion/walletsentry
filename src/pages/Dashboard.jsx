@@ -12,15 +12,6 @@ const METRICS = [
   { id: 'proofs',    label: 'AI Proofs Generated',    target: 147, color: 'g', sub: 'All on-chain'     },
 ]
 
-const TRANSACTIONS = [
-  { hash: '4xK9...mR2p', type: 'Swap',     amount: '120 SOL',        time: '2 min ago',  risk: 'SAFE',     chip: 'rc-green' },
-  { hash: '7bN3...qW8s', type: 'Approval', amount: 'Unlimited USDC', time: '18 min ago', risk: 'CRITICAL', chip: 'rc-red'   },
-  { hash: '2pL5...kX4d', type: 'Transfer', amount: '0.5 SOL',        time: '1 hr ago',   risk: 'SAFE',     chip: 'rc-green' },
-  { hash: '9mQ7...hF1c', type: 'NFT Mint', amount: '0.1 SOL',        time: '2 hrs ago',  risk: 'REVIEW',   chip: 'rc-amber' },
-  { hash: '5rT2...vP9k', type: 'Stake',    amount: '50 SOL',         time: '3 hrs ago',  risk: 'SAFE',     chip: 'rc-green' },
-  { hash: '8nL6...mK3j', type: 'Approve',  amount: '1000 USDC',      time: '5 hrs ago',  risk: 'MEDIUM',   chip: 'rc-amber' },
-]
-
 export default function Dashboard() {
   const navigate = useNavigate()
   const { walletAddress } = useContext(WalletContext)
@@ -120,7 +111,7 @@ export default function Dashboard() {
           <div className="feed-card">
             <div className="feed-card-header">
               <span className="feed-title">Live Threat Feed</span>
-              <span className="feed-count">{THREATS.length} events</span>
+              <span className="feed-count">{proofs.length} events</span>
             </div>
             <div className="feed-list">
               {proofs.length > 0 ? (
