@@ -4,6 +4,9 @@ import { ThemeContext, WalletContext } from './context'
 import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import TokenScanner from './pages/TokenScanner'
+import Approvals from './pages/Approvals'
+import History from './pages/History'
+import ProofReceipts from './pages/ProofReceipts'
 
 export default function App() {
   const [theme, setTheme] = useState('light')
@@ -27,6 +30,9 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/scanner" element={<TokenScanner />} />
+            <Route path="/approvals" element={<Approvals />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/proofs" element={<ProofReceipts />} />
           </Routes>
         </BrowserRouter>
       </WalletContext.Provider>

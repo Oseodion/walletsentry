@@ -28,7 +28,7 @@ async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function callAPIWithRetry(tokenAddress, maxRetries = 3) {
+async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
   const delays = [1000, 2000, 4000]
   let lastError
 
@@ -42,9 +42,12 @@ async function callAPIWithRetry(tokenAddress, maxRetries = 3) {
         },
         body: JSON.stringify({
           model: MODEL,
-          messages: [
+          messages: isApprovals ? [
+            { role: 'system', content: 'You are a Solana wallet security expert. Analyze these token approvals and give an overall risk assessment. Respond in JSON only: {overallRisk: string, riskScore: number, summary: string, topThreats: string[]}' },
+            { role: 'user', content: query },
+          ] : [
             { role: 'system', content: SCAN_SYSTEM_PROMPT },
-            { role: 'user', content: 'Analyze this Solana token address for security risks: ' + tokenAddress },
+            { role: 'user', content: 'Analyze this Solana token address for security risks: ' + query },
           ],
         }),
       })
@@ -86,6 +89,40 @@ async function callAPIWithRetry(tokenAddress, maxRetries = 3) {
   }
 
   throw lastError
+}
+
+export async function analyzeApprovals(approvals) {
+  let text
+  try {
+    text = await callAPIWithRetry(`Analyze these approvals: ${JSON.stringify(approvals)}`, true)
+  } catch {
+    return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
+  }
+
+  const trimmed = text.trim()
+
+  let result
+  try {
+    result = JSON.parse(trimmed)
+  } catch {
+    const match = trimmed.match(/\{[\s\S]*\}/)
+    if (!match) return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
+    try {
+      result = JSON.parse(match[0])
+    } catch {
+      return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
+    }
+  }
+
+  const encoder = new TextEncoder()
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(trimmed))
+  const hash = 'sha256:' + Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+
+  const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC'
+
+  return { result, hash, timestamp, isDemo: false }
 }
 
 export async function analyzeToken(tokenAddress) {
