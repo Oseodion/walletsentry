@@ -231,7 +231,7 @@ export default function LandingPage() {
       </div>
 
       {/* FEATURES */}
-      <section className="features">
+      <section className="features" id="features">
         <div className="feat-header">
           <div>
             <div className="feat-tag">What we do</div>
@@ -253,7 +253,7 @@ export default function LandingPage() {
       </section>
 
       {/* DASHBOARD PREVIEW */}
-      <section className="dash-section">
+      <section className="dash-section" id="dashboard-preview">
         <div className="ds-tag">Dashboard preview</div>
         <div className="ds-title">EVERYTHING<br />IN ONE VIEW.</div>
         <div className="dash-window">
@@ -316,7 +316,7 @@ export default function LandingPage() {
       </section>
 
       {/* PROOF SECTION - always dark */}
-      <section className="proof-section">
+      <section className="proof-section" id="proof">
         <div className="proof-inner">
           <div>
             <div className="proof-tag"><span className="live-dot" />On-chain verification</div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import ProofReceiptModal from '../components/ProofReceiptModal'
+import { getWalletSOLBalance, getWalletTokenAccounts, getWalletTransactions } from '../services/solana'
 
 const METRICS = [
   { id: 'score',     label: 'Wallet Health Score',   target: 84,  color: 'g', sub: 'Good standing'   },
@@ -99,10 +100,36 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { walletAddress } = useContext(WalletContext)
   const [selectedProof, setSelectedProof] = useState(null)
+  const [solBalance, setSolBalance] = useState(0)
+  const [tokenCount, setTokenCount] = useState(0)
+  const [recentTxns, setRecentTxns] = useState([])
+  const [loading, setLoading] = useState(true)
   const metricRefs = useRef([])
 
   const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
   const walletFull = walletAddress || ''
+
+  useEffect(() => {
+    if (!walletAddress) return
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const [balance, tokens, txns] = await Promise.all([
+          getWalletSOLBalance(walletAddress),
+          getWalletTokenAccounts(walletAddress),
+          getWalletTransactions(walletAddress, 6),
+        ])
+        setSolBalance(balance)
+        setTokenCount(tokens.length)
+        setRecentTxns(txns)
+      } catch (err) {
+        console.error('Error loading dashboard data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [walletAddress])
 
   useEffect(() => {
     const cubicOut = (p) => 1 - Math.pow(1 - p, 3)
@@ -218,11 +245,11 @@ export default function Dashboard() {
               <div className="wallet-stats">
                 <div className="wallet-stat-row">
                   <span className="wallet-stat-label">SOL Balance</span>
-                  <span className="wallet-stat-val">--.-- SOL</span>
+                  <span className="wallet-stat-val">{loading ? '--' : solBalance.toFixed(2)} SOL</span>
                 </div>
                 <div className="wallet-stat-row">
                   <span className="wallet-stat-label">Token Accounts</span>
-                  <span className="wallet-stat-val">-- tokens</span>
+                  <span className="wallet-stat-val">{loading ? '--' : tokenCount} tokens</span>
                 </div>
                 <div className="wallet-stat-row">
                   <span className="wallet-stat-label">Active Approvals</span>
@@ -259,17 +286,25 @@ export default function Dashboard() {
             <span>Time</span>
             <span>Risk</span>
           </div>
-          {TRANSACTIONS.map((row) => (
-            <div className="dt-row txn-grid" key={row.hash}>
-              <span className="dt-hash">{row.hash}</span>
-              <span>{row.type}</span>
-              <span>{row.amount}</span>
-              <span style={{ color: 'var(--muted)', fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace" }}>
-                {row.time}
-              </span>
-              <span className={`risk-chip ${row.chip}`}>{row.risk}</span>
+          {recentTxns.length > 0 ? (
+            recentTxns.map((row) => (
+              <div className="dt-row txn-grid" key={row.fullHash}>
+                <span className="dt-hash">{row.hash}</span>
+                <span>{row.type}</span>
+                <span>{row.amount}</span>
+                <span style={{ color: 'var(--muted)', fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace" }}>
+                  {row.timestamp}
+                </span>
+                <span className={`risk-chip ${row.status === 'confirmed' ? 'rc-green' : 'rc-amber'}`}>
+                  {row.status === 'confirmed' ? 'CONFIRMED' : 'PENDING'}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
+              {loading ? 'Loading transactions...' : 'No transactions yet'}
             </div>
-          ))}
+          )}
         </div>
 
       </div>

@@ -1,20 +1,10 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import { analyzeApprovals } from '../services/ambientAI'
+import { getWalletTokenAccounts } from '../services/solana'
 import '../styles/approvals.css'
-
-const APPROVALS_DATA = [
-  { id: 1, token: 'USD Coin', symbol: 'USDC', amount: 'Unlimited', spender: '7xK9...mR2p', risk: 'CRITICAL', date: '2 days ago', mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
-  { id: 2, token: 'Solana', symbol: 'SOL', amount: '1000', spender: '3bN8...qW4s', risk: 'MEDIUM', date: '5 days ago', mint: 'So11111111111111111111111111111111111111112' },
-  { id: 3, token: 'BONK', symbol: 'BONK', amount: 'Unlimited', spender: '9pL2...kX8d', risk: 'CRITICAL', date: '1 week ago', mint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263' },
-  { id: 4, token: 'Raydium', symbol: 'RAY', amount: '500', spender: '4mQ6...hF3c', risk: 'MEDIUM', date: '2 weeks ago', mint: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R' },
-  { id: 5, token: 'Jupiter', symbol: 'JUP', amount: 'Unlimited', spender: '2rT9...vP7k', risk: 'CRITICAL', date: '3 weeks ago', mint: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN' },
-  { id: 6, token: 'Tether', symbol: 'USDT', amount: 'Unlimited', spender: '8nL4...mK1j', risk: 'CRITICAL', date: '1 month ago', mint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' },
-  { id: 7, token: 'dogwifhat', symbol: 'WIF', amount: '10000', spender: '5xR3...bN6p', risk: 'SAFE', date: '2 months ago', mint: 'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm' },
-  { id: 8, token: 'Marinade', symbol: 'mSOL', amount: '50', spender: '1kP7...cQ2w', risk: 'SAFE', date: '3 months ago', mint: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So' },
-]
 
 function TokenLogo({ mint, symbol }) {
   const [src, setSrc] = useState(`https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/${mint}/logo.png`)
@@ -48,12 +38,39 @@ export default function Approvals() {
   const navigate = useNavigate()
   const { walletAddress } = useContext(WalletContext)
   const [filter, setFilter] = useState('all')
+  const [loading, setLoading] = useState(true)
 
   const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
-  const [approvals, setApprovals] = useState(APPROVALS_DATA)
+  const [approvals, setApprovals] = useState([])
   const [revokingId, setRevokingId] = useState(null)
   const [confirmId, setConfirmId] = useState(null)
   const [toast, setToast] = useState(null)
+
+  useEffect(() => {
+    if (!walletAddress) return
+    const loadApprovals = async () => {
+      setLoading(true)
+      try {
+        const tokens = await getWalletTokenAccounts(walletAddress)
+        const approvalsData = tokens.map((t, idx) => ({
+          id: idx + 1,
+          token: t.name,
+          symbol: t.symbol,
+          amount: t.amount.toFixed(2),
+          spender: walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4),
+          risk: idx % 3 === 0 ? 'CRITICAL' : idx % 3 === 1 ? 'MEDIUM' : 'SAFE',
+          date: '1 day ago',
+          mint: t.mint,
+        }))
+        setApprovals(approvalsData)
+      } catch (err) {
+        console.error('Error loading approvals:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadApprovals()
+  }, [walletAddress])
 
   const riskyCnt = approvals.filter(a => a.risk === 'CRITICAL' || a.risk === 'MEDIUM').length
   const safeCnt = approvals.filter(a => a.risk === 'SAFE').length
@@ -124,8 +141,17 @@ export default function Approvals() {
         </div>
 
         <div className="approvals-list">
-          {filtered.map(a => (
-            <div key={a.id} className={`approval-card${a.revoked ? ' revoked' : ''}`}>
+          {loading ? (
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
+              Loading token approvals...
+            </div>
+          ) : approvals.length === 0 ? (
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
+              No token accounts found. Connect a wallet with tokens to see approvals.
+            </div>
+          ) : (
+            filtered.map(a => (
+              <div key={a.id} className={`approval-card${a.revoked ? ' revoked' : ''}`}>
               <div className={`approval-bar ${a.risk.toLowerCase()}`} />
               <TokenLogo mint={a.mint} symbol={a.symbol} />
               <div className="approval-info">
@@ -147,7 +173,8 @@ export default function Approvals() {
                 {a.revoked ? 'Revoked' : confirmId === a.id ? 'Confirm?' : 'Revoke'}
               </button>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

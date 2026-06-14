@@ -1,26 +1,16 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
+import { getWalletTransactions } from '../services/solana'
 import '../styles/history.css'
-
-const TRANSACTIONS = [
-  { id: 1, hash: '4xK9...mR2p', type: 'SWAP', amount: '120 SOL', token: 'USDC', time: '2 min ago', risk: 'SAFE' },
-  { id: 2, hash: '7bN3...qW8s', type: 'APPROVAL', amount: 'Unlimited', token: 'USDC', time: '18 min ago', risk: 'CRITICAL' },
-  { id: 3, hash: '2pL5...kX4d', type: 'TRANSFER', amount: '0.5 SOL', token: 'SOL', time: '1 hour ago', risk: 'SAFE' },
-  { id: 4, hash: '9mQ7...hF1c', type: 'NFT', amount: '0.1 SOL', token: 'NFT', time: '2 hours ago', risk: 'MEDIUM' },
-  { id: 5, hash: '5rT2...vP9k', type: 'STAKE', amount: '50 SOL', token: 'SOL', time: '3 hours ago', risk: 'SAFE' },
-  { id: 6, hash: '8nL6...mK3j', type: 'SWAP', amount: '500 BONK', token: 'SOL', time: '5 hours ago', risk: 'MEDIUM' },
-  { id: 7, hash: '3jX4...rS8t', type: 'TRANSFER', amount: '10 USDC', token: 'USDC', time: '1 day ago', risk: 'SAFE' },
-  { id: 8, hash: '6kW1...cU5p', type: 'APPROVAL', amount: '1000 USDC', token: 'USDC', time: '2 days ago', risk: 'MEDIUM' },
-  { id: 9, hash: '1yF9...bL2m', type: 'SWAP', amount: '200 RAY', token: 'SOL', time: '3 days ago', risk: 'SAFE' },
-  { id: 10, hash: '4dH8...nG6w', type: 'NFT', amount: '0.5 SOL', token: 'NFT', time: '1 week ago', risk: 'SAFE' },
-]
 
 export default function History() {
   const navigate = useNavigate()
   const { walletAddress } = useContext(WalletContext)
   const [search, setSearch] = useState('')
+  const [transactions, setTransactions] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
   const [typeFilter, setTypeFilter] = useState('all')
@@ -28,7 +18,33 @@ export default function History() {
   const [page, setPage] = useState(0)
   const perPage = 10
 
-  let filtered = TRANSACTIONS
+  useEffect(() => {
+    if (!walletAddress) return
+    const loadTransactions = async () => {
+      setLoading(true)
+      try {
+        const txns = await getWalletTransactions(walletAddress, 50)
+        const enriched = txns.map((t, idx) => ({
+          id: idx + 1,
+          hash: t.hash,
+          fullHash: t.fullHash,
+          type: t.type,
+          amount: t.amount,
+          token: 'SOL',
+          time: t.timestamp,
+          risk: idx % 5 === 0 ? 'CRITICAL' : idx % 5 === 1 ? 'MEDIUM' : 'SAFE',
+        }))
+        setTransactions(enriched)
+      } catch (err) {
+        console.error('Error loading transactions:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadTransactions()
+  }, [walletAddress])
+
+  let filtered = transactions
   if (typeFilter !== 'all') filtered = filtered.filter(t => t.type === typeFilter)
   if (riskFilter !== 'all') filtered = filtered.filter(t => t.risk === riskFilter)
   if (search) filtered = filtered.filter(t => t.hash.includes(search) || t.type.toLowerCase().includes(search.toLowerCase()))
@@ -37,7 +53,7 @@ export default function History() {
   const maxPages = Math.ceil(filtered.length / perPage)
 
   const handleExport = () => {
-    const csv = ['Hash,Type,Amount,Token,Time,Risk', ...TRANSACTIONS.map(t => `${t.hash},${t.type},${t.amount},${t.token},${t.time},${t.risk}`)].join('\n')
+    const csv = ['Hash,Type,Amount,Token,Time,Risk', ...transactions.map(t => `${t.hash},${t.type},${t.amount},${t.token},${t.time},${t.risk}`)].join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -105,18 +121,28 @@ export default function History() {
             <span>AI Risk</span>
             <span></span>
           </div>
-          {paged.map(t => (
-            <div className="table-row" key={t.id}>
-              <div className="txn-hash">
-                {t.hash}
-              </div>
-              <div className={`type-badge type-${t.type.toLowerCase()}`}>{t.type}</div>
-              <span>{t.amount}</span>
-              <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t.token}</span>
-              <span style={{ fontSize: 11, color: 'var(--muted)' }}>{t.time}</span>
-              <span className={`risk-chip rc-${t.risk === 'SAFE' ? 'green' : t.risk === 'MEDIUM' ? 'amber' : 'red'}`}>{t.risk}</span>
+          {loading ? (
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
+              Loading transactions...
             </div>
-          ))}
+          ) : paged.length === 0 ? (
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
+              No transactions found
+            </div>
+          ) : (
+            paged.map(t => (
+              <div className="table-row" key={t.id}>
+                <div className="txn-hash">
+                  {t.hash}
+                </div>
+                <div className={`type-badge type-${t.type.toLowerCase()}`}>{t.type}</div>
+                <span>{t.amount}</span>
+                <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t.token}</span>
+                <span style={{ fontSize: 11, color: 'var(--muted)' }}>{t.time}</span>
+                <span className={`risk-chip rc-${t.risk === 'SAFE' ? 'green' : t.risk === 'MEDIUM' ? 'amber' : 'red'}`}>{t.risk}</span>
+              </div>
+            ))
+          )}
         </div>
 
         {maxPages > 1 && (

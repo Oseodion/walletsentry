@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { WalletContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import { analyzeToken } from '../services/ambientAI'
+import { getTokenMetadata } from '../services/solana'
 import '../styles/scanner.css'
 
 const EXAMPLES = [
@@ -115,7 +116,11 @@ export default function TokenScanner() {
     setError(null)
     setTypedSummary('')
     try {
+      const metadata = await getTokenMetadata(addr)
       const result = await analyzeToken(addr)
+      if (metadata) {
+        result.tokenMetadata = metadata
+      }
       setData(result)
     } catch (err) {
       setError(err.message || 'Analysis failed. Check your API key and try again.')
@@ -222,6 +227,11 @@ export default function TokenScanner() {
                       {result.riskLevel}
                     </div>
                     <div className="risk-score-meta">
+                      {data.tokenMetadata && (
+                        <>
+                          <strong>{data.tokenMetadata.symbol || 'UNKNOWN'}</strong> - {data.tokenMetadata.name || 'Unknown Token'}<br />
+                        </>
+                      )}
                       Score: {result.riskScore} / 100<br />
                       Address: {address.slice(0, 8)}...{address.slice(-6)}
                     </div>

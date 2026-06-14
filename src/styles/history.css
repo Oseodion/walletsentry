@@ -141,10 +141,12 @@
 .type-badge {
   font-size: 10px;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: 6px 14px;
   border-radius: 4px;
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 0.5px;
+  margin-right: 16px;
+  display: inline-block;
 }
 
 .type-swap { background: rgba(37,99,235,0.1); color: #2563eb; }

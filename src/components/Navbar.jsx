@@ -75,41 +75,73 @@ export default function Navbar() {
 
   const shortAddress = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : ''
 
+  const handleNavClick = (targetId) => {
+    const el = document.getElementById(targetId)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  const handleDocsClick = () => {
+    window.open('https://docs.ambient.xyz', '_blank')
+  }
+
   return (
     <>
       <nav className="landing-nav">
         <div className="logo">WALLET<span>SENTRY</span></div>
         {!onDashboard && (
           <div className="nav-links">
-            <a href="#">Dashboard</a>
-            <a href="#">Scanner</a>
-            <a href="#">Approvals</a>
-            <a href="#">Docs</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('dashboard-preview') }}>Dashboard</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('features') }}>Scanner</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('proof') }}>Approvals</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleDocsClick() }}>Docs</a>
           </div>
         )}
         <div className="nav-right">
           <button className="theme-toggle" onClick={toggleTheme} title="Toggle dark mode">
             {theme === 'dark' ? '○' : '◑'}
           </button>
-          {walletAddress ? (
+          {onDashboard ? (
             <>
-              <div style={{
-                background: 'var(--surface2)', border: '1px solid var(--border)',
-                borderRadius: 8, padding: '6px 12px', fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 12, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8
-              }}>
+              {walletAddress && (
                 <div style={{
-                  width: 6, height: 6, background: '#00cc55', borderRadius: '50%',
-                  animation: 'livepulse 2s infinite'
-                }} />
-                {shortAddress}
-              </div>
+                  background: 'var(--surface2)', border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '6px 12px', fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 12, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8
+                }}>
+                  <div style={{
+                    width: 6, height: 6, background: '#00cc55', borderRadius: '50%',
+                    animation: 'livepulse 2s infinite'
+                  }} />
+                  {shortAddress}
+                </div>
+              )}
               <button className="btn-connect" onClick={handleDisconnect}>Disconnect</button>
             </>
           ) : (
-            <button className="btn-connect" onClick={handleConnect} disabled={connecting}>
-              {connecting ? 'Connecting...' : 'Connect Wallet'}
-            </button>
+            <>
+              {walletAddress ? (
+                <>
+                  <div style={{
+                    background: 'var(--surface2)', border: '1px solid var(--border)',
+                    borderRadius: 8, padding: '6px 12px', fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 12, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8
+                  }}>
+                    <div style={{
+                      width: 6, height: 6, background: '#00cc55', borderRadius: '50%',
+                      animation: 'livepulse 2s infinite'
+                    }} />
+                    {shortAddress}
+                  </div>
+                  <button className="btn-connect" onClick={handleDisconnect}>Disconnect</button>
+                </>
+              ) : (
+                <button className="btn-connect" onClick={handleConnect} disabled={connecting}>
+                  {connecting ? 'Connecting...' : 'Connect Wallet'}
+                </button>
+              )}
+            </>
           )}
         </div>
       </nav>
