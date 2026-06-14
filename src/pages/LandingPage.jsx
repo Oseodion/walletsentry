@@ -140,7 +140,6 @@ export default function LandingPage() {
             </p>
             <div className="hero-btns">
               <button className="btn-hero-primary" onClick={() => navigate('/dashboard')}>Connect Wallet</button>
-              <button className="btn-hero-secondary">View Demo</button>
             </div>
           </div>
 
@@ -334,7 +333,7 @@ export default function LandingPage() {
             </div>
             <div className="pc-row">
               <span className="pc-key">Decision</span>
-              <span className="pc-val">HIGH RISK - Unlimited Approval</span>
+              <span className="pc-val">AI Decision - Verified on Ambient Network</span>
             </div>
             <div className="pc-row">
               <span className="pc-key">Model</span>
@@ -342,7 +341,7 @@ export default function LandingPage() {
             </div>
             <div className="pc-row">
               <span className="pc-key">Timestamp</span>
-              <span className="pc-val">2026-06-03 14:32:07 UTC</span>
+              <span className="pc-val">Live - Updated on each AI call</span>
             </div>
             <div className="pc-row">
               <span className="pc-key">Consensus</span>
@@ -350,7 +349,7 @@ export default function LandingPage() {
             </div>
             <div className="pc-row">
               <span className="pc-key">Hash</span>
-              <span className="pc-hash">sha256:a4f2c8d91b3e7f5629c4a1b8e3d2f701...</span>
+              <span className="pc-hash">Generated per AI decision</span>
             </div>
           </div>
         </div>

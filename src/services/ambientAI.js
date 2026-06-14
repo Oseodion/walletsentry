@@ -52,11 +52,14 @@ async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
         }),
       })
 
+      console.log('[Ambient] Status:', response.status)
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
+      console.log('[Ambient] Response:', JSON.stringify(data))
       console.log('[Ambient API Response]', JSON.stringify(data, null, 2))
 
       if (data.error) {

@@ -92,10 +92,21 @@ export default function Navbar() {
         <div className="logo">WALLET<span>SENTRY</span></div>
         {!onDashboard && (
           <div className="nav-links">
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('dashboard-preview') }}>Dashboard</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('features') }}>Scanner</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('proof') }}>Approvals</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); handleDocsClick() }}>Docs</a>
+            {walletAddress ? (
+              <>
+                <a href="#" onClick={(e) => { e.preventDefault(); navigate('/dashboard') }}>Dashboard</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); navigate('/scanner') }}>Scanner</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); navigate('/approvals') }}>Approvals</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); handleDocsClick() }}>Docs</a>
+              </>
+            ) : (
+              <>
+                <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('dashboard-preview') }}>Dashboard</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('features') }}>Scanner</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('proof') }}>Approvals</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); handleDocsClick() }}>Docs</a>
+              </>
+            )}
           </div>
         )}
         <div className="nav-right">
@@ -121,7 +132,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {walletAddress ? (
+              {walletAddress && (
                 <>
                   <div style={{
                     background: 'var(--surface2)', border: '1px solid var(--border)',
@@ -134,12 +145,8 @@ export default function Navbar() {
                     }} />
                     {shortAddress}
                   </div>
-                  <button className="btn-connect" onClick={handleDisconnect}>Disconnect</button>
+                  <button className="btn-connect" onClick={() => navigate('/dashboard')}>Go to Dashboard</button>
                 </>
-              ) : (
-                <button className="btn-connect" onClick={handleConnect} disabled={connecting}>
-                  {connecting ? 'Connecting...' : 'Connect Wallet'}
-                </button>
               )}
             </>
           )}
