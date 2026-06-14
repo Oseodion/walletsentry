@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ThemeContext, WalletContext } from '../context'
+import WalletDropdown from './WalletDropdown'
 
 function PhantomModal({ isOpen, message, onClose }) {
   if (!isOpen) return null
@@ -113,20 +114,12 @@ export default function Navbar() {
           </button>
           {walletAddress ? (
             <>
-              <div style={{
-                background: 'var(--surface2)', border: '1px solid var(--border)',
-                borderRadius: 8, padding: '6px 12px', fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 12, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8
-              }}>
-                <div style={{
-                  width: 6, height: 6, background: '#00cc55', borderRadius: '50%',
-                  animation: 'livepulse 2s infinite'
-                }} />
-                {shortAddress}
-              </div>
-              <button className="btn-connect" onClick={onDashboard ? handleDisconnect : () => navigate('/dashboard')}>
-                {onDashboard ? 'Disconnect' : 'Go to Dashboard'}
-              </button>
+              <WalletDropdown walletAddress={walletAddress} shortAddress={shortAddress} />
+              {!onDashboard && (
+                <button className="btn-connect" onClick={() => navigate('/dashboard')}>
+                  Go to Dashboard
+                </button>
+              )}
             </>
           ) : (
             <button className="btn-connect" onClick={handleConnect} disabled={connecting}>

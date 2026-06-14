@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { WalletContext, ProofReceiptContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import ProofReceiptModal from '../components/ProofReceiptModal'
+import WalletDropdown from '../components/WalletDropdown'
 import { getWalletSOLBalance, getWalletTokenAccounts, getWalletTransactions } from '../services/solana'
 
 export default function Dashboard() {
@@ -104,13 +105,7 @@ export default function Dashboard() {
     <DashboardLayout>
       {/* TOP BAR */}
       <div className="dash-topbar">
-        <div className="wallet-badge">
-          <div className="wallet-dot" />
-          {walletShort}
-        </div>
-        <button className="btn-disconnect" onClick={() => navigate('/')}>
-          Disconnect
-        </button>
+        <WalletDropdown walletAddress={walletFull} shortAddress={walletShort} />
       </div>
 
       {/* SCROLLABLE CONTENT */}

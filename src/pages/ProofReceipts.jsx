@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useContext } from 'react'
 import { WalletContext, ProofReceiptContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
+import WalletDropdown from '../components/WalletDropdown'
 import '../styles/proofreceipts.css'
 
 export default function ProofReceipts() {
@@ -14,13 +15,7 @@ export default function ProofReceipts() {
   return (
     <DashboardLayout>
       <div className="dash-topbar">
-        <div className="wallet-badge">
-          <div className="wallet-dot" />
-          {walletShort}
-        </div>
-        <button className="btn-disconnect" onClick={() => navigate('/')}>
-          Disconnect
-        </button>
+        <WalletDropdown walletAddress={walletAddress} shortAddress={walletShort} />
       </div>
 
       <div className="proofs-wrap">

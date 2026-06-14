@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { WalletContext, ProofReceiptContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
+import WalletDropdown from '../components/WalletDropdown'
 import { analyzeApprovals } from '../services/ambientAI'
 import { getWalletTokenAccounts } from '../services/solana'
 import '../styles/approvals.css'
@@ -121,13 +122,7 @@ export default function Approvals() {
   return (
     <DashboardLayout>
       <div className="dash-topbar">
-        <div className="wallet-badge">
-          <div className="wallet-dot" />
-          {walletShort}
-        </div>
-        <button className="btn-disconnect" onClick={() => navigate('/')}>
-          Disconnect
-        </button>
+        <WalletDropdown walletAddress={walletAddress} shortAddress={walletShort} />
       </div>
 
       <div className="approvals-wrap">
