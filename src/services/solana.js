@@ -1,31 +1,58 @@
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 
-const RPC_URL = 'https://rpc.ambient.xyz'
-const JUPITER_TOKEN_LIST = 'https://token.jup.ag/all'
+const RPC_URLS = [
+  'https://rpc.ambient.xyz',
+  'https://api.mainnet-beta.solana.com'
+]
+
+const JUPITER_TOKEN_URLS = [
+  'https://tokens.jup.ag/tokens?tags=verified',
+  'https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json',
+  'https://token.jup.ag/all'
+]
 
 let connection = null
 let tokenCache = null
 
 function getConnection() {
   if (!connection) {
-    connection = new Connection(RPC_URL, 'confirmed')
+    connection = new Connection(RPC_URLS[0], 'confirmed')
   }
   return connection
+}
+
+async function tryFetchTokenList() {
+  for (const url of JUPITER_TOKEN_URLS) {
+    try {
+      const resp = await fetch(url)
+      if (!resp.ok) continue
+      const data = await resp.json()
+      return data
+    } catch (err) {
+      console.log(`[Solana] Failed to fetch from ${url}:`, err.message)
+      continue
+    }
+  }
+  return null
 }
 
 export async function getTokenCache() {
   if (tokenCache) return tokenCache
   try {
-    const resp = await fetch(JUPITER_TOKEN_LIST)
-    if (!resp.ok) throw new Error('Failed to fetch token list')
-    const tokens = await resp.json()
+    const data = await tryFetchTokenList()
+    if (!data) return {}
+
     tokenCache = {}
+    const tokens = Array.isArray(data) ? data : (data.tokens || [])
     tokens.forEach(t => {
-      tokenCache[t.address] = t
+      const address = t.address || t.mint
+      if (address) {
+        tokenCache[address] = t
+      }
     })
     return tokenCache
   } catch (err) {
-    console.error('Failed to fetch Jupiter token list:', err)
+    console.error('Failed to fetch token cache:', err)
     return {}
   }
 }
@@ -44,6 +71,11 @@ export async function getWalletSOLBalance(walletAddress) {
 
 export async function getWalletTokenAccounts(walletAddress) {
   try {
+    if (!walletAddress || typeof walletAddress !== 'string' || walletAddress.length < 32 || walletAddress.length > 44) {
+      console.error('[Solana] Invalid wallet address:', walletAddress)
+      return []
+    }
+
     const conn = getConnection()
     const pubkey = new PublicKey(walletAddress)
     const tokens = await conn.getParsedTokenAccountsByOwner(pubkey, {

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import '../styles/dashboard.css'
 
 const NAV_ITEMS = [
@@ -13,6 +13,7 @@ const TAB_LABELS = ['Dashboard', 'Scanner', 'Approvals', 'History', 'Proofs']
 
 export default function DashboardLayout({ children }) {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
 
   return (
     <>
