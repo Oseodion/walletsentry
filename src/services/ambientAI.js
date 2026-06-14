@@ -1,14 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk'
+const MODEL = 'ambient/large'
+const API_BASE = 'https://api.ambient.xyz/v1/chat/completions'
 
-const client = new Anthropic({
-  apiKey: import.meta.env.VITE_AMBIENT_API_KEY,
-  baseURL: 'https://api.ambient.xyz',
-  dangerouslyAllowBrowser: true,
-})
-
-export const MODEL = 'ambient-ai'
-
-export default client
+export default { MODEL, API_BASE }
 
 const SCAN_SYSTEM_PROMPT = `You are a Solana token security analyzer powered by Ambient Network. Analyze the given token address for security risks. Respond in JSON only with this exact structure: { "riskScore": number 0-100, "riskLevel": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "SAFE", "summary": "2-3 sentences about the overall risk", "factors": { "contractAge": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "liquidityLock": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "holderDistribution": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "mintAuthority": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "freezeAuthority": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "deployerHistory": {"status": "safe" | "warning" | "risk", "note": "brief finding"} } }. Return ONLY the JSON object, no markdown, no explanation.`
 
@@ -41,18 +34,27 @@ async function callAPIWithRetry(tokenAddress, maxRetries = 3) {
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const message = await client.messages.create({
-        model: MODEL,
-        max_tokens: 1024,
-        system: SCAN_SYSTEM_PROMPT,
-        messages: [
-          {
-            role: 'user',
-            content: `Analyze this Solana token address for security risks: ${tokenAddress}`,
-          },
-        ],
+      const response = await fetch(API_BASE, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + import.meta.env.VITE_AMBIENT_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: [
+            { role: 'system', content: SCAN_SYSTEM_PROMPT },
+            { role: 'user', content: 'Analyze this Solana token address for security risks: ' + tokenAddress },
+          ],
+        }),
       })
-      return message
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.choices[0].message.content
     } catch (err) {
       lastError = err
       if (attempt < maxRetries) {
@@ -65,20 +67,20 @@ async function callAPIWithRetry(tokenAddress, maxRetries = 3) {
 }
 
 export async function analyzeToken(tokenAddress) {
-  let message
+  let text
   try {
-    message = await callAPIWithRetry(tokenAddress)
+    text = await callAPIWithRetry(tokenAddress)
   } catch {
     return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
   }
 
-  const text = message.content[0].text.trim()
+  const trimmed = text.trim()
 
   let result
   try {
-    result = JSON.parse(text)
+    result = JSON.parse(trimmed)
   } catch {
-    const match = text.match(/\{[\s\S]*\}/)
+    const match = trimmed.match(/\{[\s\S]*\}/)
     if (!match) return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
     try {
       result = JSON.parse(match[0])
@@ -88,7 +90,7 @@ export async function analyzeToken(tokenAddress) {
   }
 
   const encoder = new TextEncoder()
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(text))
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(trimmed))
   const hash = 'sha256:' + Array.from(new Uint8Array(hashBuffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
