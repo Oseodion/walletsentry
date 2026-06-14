@@ -49,6 +49,7 @@ async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
             { role: 'system', content: SCAN_SYSTEM_PROMPT },
             { role: 'user', content: 'Analyze this Solana token address for security risks: ' + query },
           ],
+          stream: false,
         }),
       })
 

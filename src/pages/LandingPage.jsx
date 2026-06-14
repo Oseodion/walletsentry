@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import '../styles/landing.css'
 import Navbar from '../components/Navbar'
 
@@ -32,7 +31,7 @@ const FEATURES = [
   },
   {
     num: '06 - AI',
-    name: 'Powered by GLM 5.1',
+    name: 'Powered by ambient/large',
     desc: "Running on Ambient Network's 600B parameter model. The most powerful verified AI in the crypto ecosystem.",
   },
 ]
@@ -55,7 +54,6 @@ export default function LandingPage() {
   const statsRef  = useRef(null)
   const stat600Ref = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const cubicOut = (p) => 1 - Math.pow(1 - p, 3)
@@ -128,7 +126,7 @@ export default function LandingPage() {
           <div>
             <div className="hero-tag">
               <span className="live-dot" />
-              Powered by Ambient Network - GLM 5.1
+              Powered by Ambient Network - ambient/large
             </div>
             <div className="hero-title">
               YOUR<br />
@@ -138,8 +136,11 @@ export default function LandingPage() {
             <p className="hero-sub">
               Real-time AI security for your Solana wallet. Every threat alert cryptographically verified on-chain - no black boxes, no guessing.
             </p>
-            <div className="hero-btns">
-              <button className="btn-hero-primary" onClick={() => navigate('/dashboard')}>Connect Wallet</button>
+            <div style={{ marginTop: 32 }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); document.getElementById('features').scrollIntoView({ behavior: 'smooth' }) }}
+                style={{ color: 'var(--green)', textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+                See how it works ↓
+              </a>
             </div>
           </div>
 
@@ -209,7 +210,7 @@ export default function LandingPage() {
           <div className="stat-cell">
             <div className="stat-val" style={{ color: 'var(--green)' }} ref={stat600Ref}>600B+</div>
             <div className="stat-label">Model Parameters</div>
-            <div className="stat-sub">GLM 5.1 on Ambient Network</div>
+            <div className="stat-sub">ambient/large on Ambient Network</div>
           </div>
           <div className="stat-cell">
             <div className="stat-val" style={{ color: 'var(--green)' }}>0.1%</div>
@@ -337,7 +338,7 @@ export default function LandingPage() {
             </div>
             <div className="pc-row">
               <span className="pc-key">Model</span>
-              <span className="pc-val g">GLM 5.1 - Ambient Network</span>
+              <span className="pc-val g">ambient/large - Ambient Network</span>
             </div>
             <div className="pc-row">
               <span className="pc-key">Timestamp</span>
@@ -396,7 +397,7 @@ export default function LandingPage() {
           </div>
           <div className="footer-bottom">
             <div className="footer-copy">WalletSentry - 2026. Built on Ambient Network testnet.</div>
-            <div className="footer-powered">Verified by <span>Proof of Logits</span> - GLM 5.1</div>
+            <div className="footer-powered">Verified by <span>Proof of Logits</span> - ambient/large</div>
           </div>
         </div>
       </footer>
