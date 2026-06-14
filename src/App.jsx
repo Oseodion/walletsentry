@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ThemeContext, WalletContext, ProofReceiptContext } from './context'
+import { ThemeContext, WalletContext, ProofReceiptContext, walletStorage, proofStorage } from './context'
+import { getWalletSOLBalance, getWalletTokenAccounts, getWalletTransactions } from './services/solana'
 import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import TokenScanner from './pages/TokenScanner'
@@ -15,11 +16,34 @@ function ProtectedRoute({ element, isConnected }) {
 export default function App() {
   const [theme, setTheme] = useState('light')
   const [walletAddress, setWalletAddress] = useState(null)
+  const [isRestoringFromStorage, setIsRestoringFromStorage] = useState(true)
   const [proofs, setProofs] = useState([])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'light')
+
+    const savedWallet = walletStorage.load()
+    const savedProofs = proofStorage.load()
+
+    if (savedProofs.length > 0) {
+      setProofs(savedProofs)
+    }
+
+    if (savedWallet) {
+      setWalletAddress(savedWallet)
+      console.log('[App] Restored wallet from storage:', savedWallet.slice(0, 4) + '...' + savedWallet.slice(-4))
+    }
+
+    setIsRestoringFromStorage(false)
   }, [])
+
+  useEffect(() => {
+    if (walletAddress) {
+      walletStorage.save(walletAddress)
+    } else {
+      walletStorage.clear()
+    }
+  }, [walletAddress])
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light'
@@ -28,16 +52,21 @@ export default function App() {
   }
 
   const addProof = (proof) => {
-    setProofs(prev => [proof, ...prev])
+    setProofs(prev => {
+      const updated = [proof, ...prev].slice(0, 50)
+      proofStorage.save(updated)
+      return updated
+    })
   }
 
   const clearProofs = () => {
     setProofs([])
+    proofStorage.clear()
   }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <WalletContext.Provider value={{ walletAddress, setWalletAddress }}>
+      <WalletContext.Provider value={{ walletAddress, setWalletAddress, isRestoringFromStorage }}>
         <ProofReceiptContext.Provider value={{ proofs, addProof, clearProofs }}>
         <BrowserRouter>
           <Routes>

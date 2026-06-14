@@ -16,7 +16,9 @@ let tokenCache = null
 
 function getConnection() {
   if (!connection) {
-    connection = new Connection(RPC_URLS[0], 'confirmed')
+    const endpoint = RPC_URLS[0]
+    console.log('[Solana] Using RPC:', endpoint)
+    connection = new Connection(endpoint, 'confirmed')
   }
   return connection
 }
