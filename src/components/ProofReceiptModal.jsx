@@ -17,7 +17,7 @@ export default function ProofReceiptModal({ proof, onClose }) {
         </div>
         <div className="pc-row">
           <span className="pc-key">Model</span>
-          <span className="pc-val g">GLM 5.1 - Ambient Network</span>
+          <span className="pc-val g">ambient/large - Ambient Network</span>
         </div>
         <div className="pc-row">
           <span className="pc-key">Timestamp</span>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { WalletContext } from '../context'
+import { WalletContext, ProofReceiptContext } from '../context'
 import DashboardLayout from '../components/DashboardLayout'
 import { analyzeToken } from '../services/ambientAI'
 import { getTokenMetadata } from '../services/solana'
@@ -87,6 +87,7 @@ function StatusBadge({ status }) {
 export default function TokenScanner() {
   const navigate = useNavigate()
   const { walletAddress } = useContext(WalletContext)
+  const { addProof } = useContext(ProofReceiptContext)
   const [address, setAddress]           = useState('')
 
   const walletShort = walletAddress ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : '...'
@@ -122,6 +123,13 @@ export default function TokenScanner() {
         result.tokenMetadata = metadata
       }
       setData(result)
+
+      addProof({
+        type: 'Token Analysis',
+        decision: `${result.result.riskLevel} - Risk Score ${result.result.riskScore}/100`,
+        timestamp: result.timestamp,
+        hash: result.hash,
+      })
     } catch (err) {
       setError(err.message || 'Analysis failed. Check your API key and try again.')
     } finally {
@@ -247,7 +255,7 @@ export default function TokenScanner() {
                 <div className="ai-terminal">
                   <div className="ai-terminal-label">
                     <span className="live-dot" />
-                    GLM 5.1 - Ambient Network
+                    ambient/large - Ambient Network
                   </div>
                   {typedSummary}
                   {!summaryDone && <span className="cursor" />}
@@ -283,7 +291,7 @@ export default function TokenScanner() {
               </div>
               <div className="pc-row">
                 <span className="pc-key">Model</span>
-                <span className="pc-val g">GLM 5.1 - Ambient Network</span>
+                <span className="pc-val g">ambient/large - Ambient Network</span>
               </div>
               <div className="pc-row">
                 <span className="pc-key">Timestamp</span>

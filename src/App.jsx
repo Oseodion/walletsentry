@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ThemeContext, WalletContext } from './context'
+import { ThemeContext, WalletContext, ProofReceiptContext } from './context'
 import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import TokenScanner from './pages/TokenScanner'
@@ -15,6 +15,7 @@ function ProtectedRoute({ element, isConnected }) {
 export default function App() {
   const [theme, setTheme] = useState('light')
   const [walletAddress, setWalletAddress] = useState(null)
+  const [proofs, setProofs] = useState([])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'light')
@@ -26,9 +27,18 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', next)
   }
 
+  const addProof = (proof) => {
+    setProofs(prev => [proof, ...prev])
+  }
+
+  const clearProofs = () => {
+    setProofs([])
+  }
+
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <WalletContext.Provider value={{ walletAddress, setWalletAddress }}>
+        <ProofReceiptContext.Provider value={{ proofs, addProof, clearProofs }}>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -39,6 +49,7 @@ export default function App() {
             <Route path="/proofs" element={<ProtectedRoute element={<ProofReceipts />} isConnected={!!walletAddress} />} />
           </Routes>
         </BrowserRouter>
+        </ProofReceiptContext.Provider>
       </WalletContext.Provider>
     </ThemeContext.Provider>
   )
