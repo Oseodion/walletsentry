@@ -31,20 +31,43 @@ const DEMO_FALLBACK = {
   isDemo: true,
 }
 
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function callAPIWithRetry(tokenAddress, maxRetries = 3) {
+  const delays = [1000, 2000, 4000]
+  let lastError
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const message = await client.messages.create({
+        model: MODEL,
+        max_tokens: 1024,
+        system: SCAN_SYSTEM_PROMPT,
+        messages: [
+          {
+            role: 'user',
+            content: `Analyze this Solana token address for security risks: ${tokenAddress}`,
+          },
+        ],
+      })
+      return message
+    } catch (err) {
+      lastError = err
+      if (attempt < maxRetries) {
+        await sleep(delays[attempt])
+      }
+    }
+  }
+
+  throw lastError
+}
+
 export async function analyzeToken(tokenAddress) {
   let message
   try {
-    message = await client.messages.create({
-      model: MODEL,
-      max_tokens: 1024,
-      system: SCAN_SYSTEM_PROMPT,
-      messages: [
-        {
-          role: 'user',
-          content: `Analyze this Solana token address for security risks: ${tokenAddress}`,
-        },
-      ],
-    })
+    message = await callAPIWithRetry(tokenAddress)
   } catch {
     return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
   }
