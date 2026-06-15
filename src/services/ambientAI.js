@@ -30,11 +30,16 @@ async function sleep(ms) {
 
 async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
   const delays = [1000, 2000, 4000]
+  const timeoutMs = 30000
   let lastError
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
       const response = await fetch(API_BASE, {
+        signal: controller.signal,
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + import.meta.env.VITE_AMBIENT_API_KEY,
@@ -53,6 +58,7 @@ async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
         }),
       })
 
+      clearTimeout(timeoutId)
       console.log('[Ambient] Status:', response.status)
 
       if (!response.ok) {
@@ -86,6 +92,10 @@ async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
       return data.choices[0].message.content
     } catch (err) {
       lastError = err
+      if (err.name === 'AbortError') {
+        console.error('[Ambient] Request timeout after 30 seconds')
+        throw new Error('API request timeout - took too long to respond')
+      }
       if (attempt < maxRetries) {
         await sleep(delays[attempt])
       }

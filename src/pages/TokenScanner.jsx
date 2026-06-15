@@ -151,21 +151,31 @@ export default function TokenScanner() {
     setTypedSummary('')
     try {
       const metadata = await getTokenMetadata(addr)
-      const result = await analyzeToken(addr)
-      if (metadata) {
-        result.tokenMetadata = metadata
-      }
-      setData(result)
+      const analysisResult = await analyzeToken(addr)
 
-      saveScanToHistory(addr, result.result.riskScore, result.result.riskLevel, result.result.summary)
+      if (!analysisResult) {
+        throw new Error('No analysis result returned')
+      }
+
+      const fullResult = { ...analysisResult }
+      if (metadata) {
+        fullResult.tokenMetadata = metadata
+      }
+
+      console.log('[Scanner] Analysis complete, updating state:', fullResult)
+      setData(fullResult)
+      console.log('[Scanner] State updated with result')
+
+      saveScanToHistory(addr, fullResult.result.riskScore, fullResult.result.riskLevel, fullResult.result.summary)
 
       addProof({
         type: 'Token Analysis',
-        decision: `${result.result.riskLevel} - Risk Score ${result.result.riskScore}/100`,
-        timestamp: result.timestamp,
-        hash: result.hash,
+        decision: `${fullResult.result.riskLevel} - Risk Score ${fullResult.result.riskScore}/100`,
+        timestamp: fullResult.timestamp,
+        hash: fullResult.hash,
       })
     } catch (err) {
+      console.error('[Scanner] Error during analysis:', err)
       setError(err.message || 'Analysis failed. Check your API key and try again.')
     } finally {
       setScanning(false)
