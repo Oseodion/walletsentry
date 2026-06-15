@@ -146,6 +146,7 @@ export default function LandingPage() {
           </div>
 
           <div className="hero-card">
+            <div style={{ position: 'absolute', top: 12, right: 16, fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 1, textTransform: 'uppercase' }}>Example</div>
             <div className="hcard-header">
               <span className="hcard-title">Wallet Health</span>
               <span className="hcard-live"><span className="live-dot" />Live</span>

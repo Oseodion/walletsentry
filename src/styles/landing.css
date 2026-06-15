@@ -202,6 +202,7 @@ nav.landing-nav {
   border: 1px solid #2a2a2a;
   border-radius: 20px;
   overflow: hidden;
+  position: relative;
 }
 
 .hcard-header {
@@ -840,8 +841,12 @@ footer {
 }
 
 @media (max-width: 768px) {
-  nav.landing-nav { padding: 0 20px; }
+  nav.landing-nav { padding: 0 16px; height: 56px; }
   .nav-links { display: none; }
+  .logo { font-size: 18px; letter-spacing: 2px; }
+  .btn-connect { padding: 8px 12px; font-size: 12px; }
+  .nav-right { gap: 8px; }
+  .wallet-badge { padding: 4px 8px !important; font-size: 11px; }
   .hero { padding: 60px 20px; }
   .stats-inner { grid-template-columns: 1fr 1fr; }
   .stat-cell:nth-child(2) { border-right: none; }

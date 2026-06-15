@@ -65,6 +65,7 @@ export default function WalletDropdown({ walletAddress, shortAddress }) {
           cursor: 'pointer',
           userSelect: 'none',
         }}
+        className="wallet-badge"
       >
         <div
           style={{
