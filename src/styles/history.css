@@ -209,7 +209,7 @@
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .history-wrap { padding: 20px 16px 48px; }
+  .history-wrap { padding: 20px 16px 80px; }
   .history-title { font-size: 40px; }
   .history-header { flex-direction: column; }
   .history-controls { flex-direction: column; }

@@ -245,7 +245,7 @@
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .approvals-wrap { padding: 20px 16px 48px; }
+  .approvals-wrap { padding: 20px 16px 80px; }
   .approvals-title { font-size: 40px; }
   .approvals-header { flex-direction: column; }
   .approvals-stats { flex-wrap: wrap; }

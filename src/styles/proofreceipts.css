@@ -154,7 +154,7 @@
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .proofs-wrap { padding: 20px 16px 48px; }
+  .proofs-wrap { padding: 20px 16px 80px; }
   .proofs-title { font-size: 40px; }
   .proof-receipt-card { padding: 16px; }
   .proof-row { flex-direction: column; }
