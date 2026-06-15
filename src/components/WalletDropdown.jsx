@@ -81,6 +81,7 @@ export default function WalletDropdown({ walletAddress, shortAddress }) {
 
       {isOpen && (
         <div
+          className="wallet-dropdown-menu"
           style={{
             position: 'absolute',
             top: '100%',
