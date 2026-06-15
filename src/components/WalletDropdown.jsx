@@ -89,6 +89,7 @@ export default function WalletDropdown({ walletAddress, shortAddress }) {
             border: '1px solid var(--border)',
             borderRadius: 12,
             minWidth: 200,
+            maxWidth: 280,
             zIndex: 100,
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           }}

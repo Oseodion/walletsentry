@@ -3,7 +3,7 @@ const API_BASE = 'https://api.ambient.xyz/v1/chat/completions'
 
 export default { MODEL, API_BASE }
 
-const SCAN_SYSTEM_PROMPT = `You are a Solana token security analyzer powered by Ambient Network. Analyze the given token address for security risks. Respond in JSON only with this exact structure: { "riskScore": number 0-100, "riskLevel": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "SAFE", "summary": "2-3 sentences about the overall risk", "factors": { "contractAge": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "liquidityLock": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "holderDistribution": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "mintAuthority": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "freezeAuthority": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "deployerHistory": {"status": "safe" | "warning" | "risk", "note": "brief finding"} } }. Return ONLY the JSON object, no markdown, no explanation.`
+const SCAN_SYSTEM_PROMPT = `You are a Solana token security analyzer powered by Ambient Network. Analyze the given token address for security risks. Respond in JSON only with this exact structure: { "riskScore": number 0-100, "riskLevel": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "SAFE", "summary": "2-3 sentences about the overall risk", "factors": { "contractAge": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "liquidityLock": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "holderDistribution": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "mintAuthority": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "freezeAuthority": {"status": "safe" | "warning" | "risk", "note": "brief finding"}, "deployerHistory": {"status": "safe" | "warning" | "risk", "note": "brief finding"} } }. Note: Wrapped tokens like Wrapped SOL (So111...112) are safe by design and should be rated SAFE or LOW risk despite having mint and freeze authority. These are controlled by the Solana foundation and are standard infrastructure tokens. Return ONLY the JSON object, no markdown, no explanation.`
 
 const DEMO_FALLBACK = {
   result: {
@@ -30,7 +30,7 @@ async function sleep(ms) {
 
 async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
   const delays = [1000, 2000, 4000]
-  const timeoutMs = 30000
+  const timeoutMs = 45000
   let lastError
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {

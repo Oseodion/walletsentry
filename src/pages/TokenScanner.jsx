@@ -318,7 +318,7 @@ export default function TokenScanner() {
         {scanning && (
           <div className="scanner-loading">
             <div className="scan-pulse" />
-            Ambient AI is analyzing this token...
+            Analyzing token... (this may take up to 45 seconds)
           </div>
         )}
 
