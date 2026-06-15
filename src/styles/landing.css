@@ -847,7 +847,7 @@ footer {
   .btn-connect { padding: 8px 12px; font-size: 12px; }
   .nav-right { gap: 8px; }
   .wallet-badge { padding: 4px 8px !important; font-size: 11px; }
-  .wallet-dropdown-menu { right: -8px !important; max-width: calc(100vw - 32px) !important; }
+  .wallet-dropdown-menu { right: auto !important; left: 0 !important; max-width: calc(100vw - 32px) !important; min-width: 200px !important; }
   .hero { padding: 60px 20px; }
   .stats-inner { grid-template-columns: 1fr 1fr; }
   .stat-cell:nth-child(2) { border-right: none; }

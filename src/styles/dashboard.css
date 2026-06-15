@@ -547,7 +547,7 @@
   .dash-topbar { padding: 12px 16px; }
   .two-col { grid-template-columns: 1fr; }
   .dm-metrics-row { grid-template-columns: 1fr 1fr; }
-  .wallet-dropdown-menu { right: -8px !important; max-width: calc(100vw - 32px) !important; }
+  .wallet-dropdown-menu { right: auto !important; left: 0 !important; max-width: calc(100vw - 32px) !important; min-width: 200px !important; }
 }
 
 @media (max-width: 480px) {
