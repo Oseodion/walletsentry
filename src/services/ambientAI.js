@@ -28,9 +28,34 @@ async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+let requestInProgress = false
+const requestQueue = []
+
+async function processRequestQueue() {
+  if (requestInProgress || requestQueue.length === 0) return
+  requestInProgress = true
+  const { query, isApprovals, resolve, reject } = requestQueue.shift()
+  try {
+    const result = await callAPIWithRetry(query, isApprovals)
+    resolve(result)
+  } catch (err) {
+    reject(err)
+  } finally {
+    requestInProgress = false
+    processRequestQueue()
+  }
+}
+
+function queueRequest(query, isApprovals = false) {
+  return new Promise((resolve, reject) => {
+    requestQueue.push({ query, isApprovals, resolve, reject })
+    processRequestQueue()
+  })
+}
+
 async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
-  const delays = [1000, 2000, 4000]
-  const timeoutMs = 45000
+  const delays = [3000, 6000, 12000]
+  const timeoutMs = 60000
   let lastError
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -60,6 +85,16 @@ async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
 
       clearTimeout(timeoutId)
       console.log('[Ambient] Status:', response.status)
+
+      if (response.status === 429) {
+        console.warn('[Ambient] Rate limited (429) - waiting 5 seconds before retry')
+        if (attempt < maxRetries) {
+          await sleep(5000)
+          continue
+        } else {
+          throw new Error('API rate limited - max retries exceeded')
+        }
+      }
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status} ${response.statusText}`)
@@ -93,10 +128,10 @@ async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
     } catch (err) {
       lastError = err
       if (err.name === 'AbortError') {
-        console.error('[Ambient] Request timeout after 30 seconds')
+        console.error('[Ambient] Request timeout after 60 seconds')
         throw new Error('API request timeout - took too long to respond')
       }
-      if (attempt < maxRetries) {
+      if (attempt < maxRetries && !err.message.includes('rate limited')) {
         await sleep(delays[attempt])
       }
     }
@@ -108,7 +143,7 @@ async function callAPIWithRetry(query, isApprovals = false, maxRetries = 3) {
 export async function analyzeApprovals(approvals) {
   let text
   try {
-    text = await callAPIWithRetry(`Analyze these approvals: ${JSON.stringify(approvals)}`, true)
+    text = await queueRequest(`Analyze these approvals: ${JSON.stringify(approvals)}`, true)
   } catch {
     return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
   }
@@ -142,7 +177,7 @@ export async function analyzeApprovals(approvals) {
 export async function analyzeToken(tokenAddress) {
   let text
   try {
-    text = await callAPIWithRetry(tokenAddress)
+    text = await queueRequest(tokenAddress)
   } catch {
     return { ...DEMO_FALLBACK, timestamp: new Date().toISOString() }
   }
